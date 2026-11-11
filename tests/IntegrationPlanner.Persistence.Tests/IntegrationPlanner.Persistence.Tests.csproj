@@ -14,4 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\IntegrationPlanner.Persistence\IntegrationPlanner.Persistence.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\samples\scenario3.iplan.json" Link="Samples\scenario3.iplan.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
