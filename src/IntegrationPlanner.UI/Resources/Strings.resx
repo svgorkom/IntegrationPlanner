@@ -12,7 +12,94 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="MainWindow_Title" xml:space="preserve">
+  <data name="MainWindowTitle" xml:space="preserve">
     <value>Integration Planner</value>
+  </data>
+  <data name="MainWindowTitleWithFile" xml:space="preserve">
+    <value>{0} - Integration Planner</value>
+  </data>
+  <data name="MessageCaption" xml:space="preserve">
+    <value>Integration Planner</value>
+  </data>
+  <data name="ToolbarOpen" xml:space="preserve">
+    <value>Open...</value>
+  </data>
+  <data name="ToolbarOpenToolTip" xml:space="preserve">
+    <value>Open a plan file (Ctrl+O)</value>
+  </data>
+  <data name="ToolbarScenario" xml:space="preserve">
+    <value>Scenario:</value>
+  </data>
+  <data name="ToolbarZoomIn" xml:space="preserve">
+    <value>+</value>
+  </data>
+  <data name="ToolbarZoomInToolTip" xml:space="preserve">
+    <value>Zoom in (Ctrl+Plus or Ctrl+mouse wheel)</value>
+  </data>
+  <data name="ToolbarZoomOut" xml:space="preserve">
+    <value>-</value>
+  </data>
+  <data name="ToolbarZoomOutToolTip" xml:space="preserve">
+    <value>Zoom out (Ctrl+Minus or Ctrl+mouse wheel)</value>
+  </data>
+  <data name="ToolbarResetZoomToolTip" xml:space="preserve">
+    <value>Reset zoom to 100% (Ctrl+0)</value>
+  </data>
+  <data name="ToolbarExportPng" xml:space="preserve">
+    <value>Export PNG...</value>
+  </data>
+  <data name="ToolbarExportPngToolTip" xml:space="preserve">
+    <value>Save the diagram as a PNG image</value>
+  </data>
+  <data name="ToolbarExportSvg" xml:space="preserve">
+    <value>Export SVG...</value>
+  </data>
+  <data name="ToolbarExportSvgToolTip" xml:space="preserve">
+    <value>Save the diagram as an SVG drawing</value>
+  </data>
+  <data name="ToolbarCopy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="ToolbarCopyToolTip" xml:space="preserve">
+    <value>Copy the diagram to the clipboard as an image (Ctrl+Shift+C)</value>
+  </data>
+  <data name="EmptyStateText" xml:space="preserve">
+    <value>Open a plan file to show its diagram.</value>
+  </data>
+  <data name="DialogOpenPlanTitle" xml:space="preserve">
+    <value>Open plan</value>
+  </data>
+  <data name="DialogPlanFilter" xml:space="preserve">
+    <value>Integration plans (*.iplan.json)|*.iplan.json|JSON files (*.json)|*.json|All files (*.*)|*.*</value>
+  </data>
+  <data name="DialogExportTitle" xml:space="preserve">
+    <value>Export diagram</value>
+  </data>
+  <data name="DialogPngFilter" xml:space="preserve">
+    <value>PNG image (*.png)|*.png</value>
+  </data>
+  <data name="DialogSvgFilter" xml:space="preserve">
+    <value>SVG drawing (*.svg)|*.svg</value>
+  </data>
+  <data name="ErrorOpenRead" xml:space="preserve">
+    <value>The plan file could not be read. Check that it exists and that you have access to it.</value>
+  </data>
+  <data name="ErrorOpenCorrupt" xml:space="preserve">
+    <value>The file is not a valid plan file.</value>
+  </data>
+  <data name="ErrorOpenUnsupportedVersion" xml:space="preserve">
+    <value>This plan file was made by a newer version of Integration Planner and cannot be opened.</value>
+  </data>
+  <data name="InfoDroppedReferences" xml:space="preserve">
+    <value>The plan was opened, but {0} item(s) referred to branches or connections that do not exist and were left out.</value>
+  </data>
+  <data name="ErrorExportFailed" xml:space="preserve">
+    <value>The diagram could not be saved. Check that the folder exists and that you have write access.</value>
+  </data>
+  <data name="ErrorCopyFailed" xml:space="preserve">
+    <value>The diagram could not be copied to the clipboard. Please try again.</value>
+  </data>
+  <data name="ErrorUnexpected" xml:space="preserve">
+    <value>Something went wrong. The problem has been logged. You can continue working, but if it happens again please restart Integration Planner.</value>
   </data>
 </root>

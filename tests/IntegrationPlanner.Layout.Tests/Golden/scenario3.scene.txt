@@ -1,0 +1,68 @@
+bounds -76.50,-302.30 1860.00x602.30
+line lane/ad-16384 Lane (0.00,-140.00) (360.00,-140.00)
+line lane/ad-16394 Lane (0.00,-70.00) (270.00,-70.00)
+line lane/develop Lane (0.00,0.00) (1620.00,0.00)
+line fork/ad-xxxxxx Fork (720.00,0.00) (741.00,70.00)
+line lane/ad-xxxxxx Lane (741.00,70.00) (1350.00,70.00)
+line fork/ad-16221 Fork (810.00,70.00) (831.00,140.00)
+line lane/ad-16221 Lane (831.00,140.00) (990.00,140.00)
+line fork/ad-16218 Fork (1080.00,70.00) (1101.00,140.00)
+line lane/ad-16218 Lane (1101.00,140.00) (1170.00,140.00)
+line lane/ad-15777 Lane (0.00,210.00) (1530.00,210.00)
+line lane/ad-16190 Lane (0.00,280.00) (180.00,280.00)
+line lane/ad-16250 Lane (270.00,280.00) (540.00,280.00)
+line lane/ad-16253 Lane (630.00,280.00) (900.00,280.00)
+line connector/merge-16190-into-15777 Connector (180.00,280.00) (201.00,210.00)
+line connector/merge-16394-into-develop Connector (270.00,-70.00) (291.00,0.00)
+line connector/merge-16384-into-develop Connector (360.00,-140.00) (402.00,0.00)
+line connector/pull-develop-into-15777-before-split Connector (450.00,0.00) (513.00,210.00)
+line connector/merge-16250-into-15777 Connector (540.00,280.00) (561.00,210.00)
+line connector/merge-16253-into-15777 Connector (900.00,280.00) (921.00,210.00)
+line connector/merge-16221-into-xxxxxx Connector (990.00,140.00) (1011.00,70.00)
+line connector/merge-16218-into-xxxxxx Connector (1170.00,140.00) (1191.00,70.00)
+line connector/pull-develop-into-xxxxxx Connector (1260.00,0.00) (1281.00,70.00)
+line connector/merge-xxxxxx-into-15777 Connector (1350.00,70.00) (1392.00,210.00)
+line connector/pull-develop-into-15777 Connector (1440.00,0.00) (1503.00,210.00)
+line connector/merge-15777-into-develop Connector (1530.00,210.00) (1593.00,0.00)
+text marker/release-build MarkerLabel "Release build" center=(630.00,-117.00) size=78.00x15.60 angle=-90.00 font=12.00 background=False
+text marker/lots-of-testing MarkerLabel "Lots of testing!" center=(1678.50,105.00) size=96.00x15.60 angle=0.00 font=12.00 background=False
+text branch-label/ad-16384 BranchName "AD-16384" center=(109.00,-181.05) size=60.00x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-16384 BranchSummary "Reverse orderPool extraction to resolved" center=(109.00,-164.48) size=210.00x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16384 BranchSummary "bugs on develop" center=(109.00,-150.83) size=78.75x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16394 BranchName "AD-16394" center=(116.88,-124.70) size=60.00x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-16394 BranchSummary "FMC emulator creates sequenced retrieves" center=(116.88,-108.12) size=210.00x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16394 BranchSummary "for multiple LD on the same lift even if it" center=(116.88,-94.47) size=225.75x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16394 BranchSummary "has a vertical merge" center=(116.88,-80.82) size=105.00x13.65 angle=0.00 font=10.50 background=False
+text branch-label/develop BranchName "Develop" center=(-30.25,0.00) size=52.50x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-xxxxxx BranchName "AD-xxxxxx" center=(826.38,42.60) size=67.50x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-xxxxxx BranchSummary "Reverse the reversed order pool" center=(826.38,59.18) size=162.75x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16221 BranchName "AD-16221" center=(905.88,98.95) size=60.00x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-16221 BranchSummary "race condition in orderpool" center=(905.88,115.52) size=141.75x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16221 BranchSummary "during quickstart" center=(905.88,129.18) size=89.25x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16218 BranchName "AD-16218" center=(1160.12,71.65) size=60.00x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-16218 BranchSummary "SP fails for reason" center=(1160.12,88.22) size=99.75x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16218 BranchSummary "Expected:" center=(1160.12,101.88) size=47.25x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16218 BranchSummary ""OtherErrorNoOrphan"" center=(1160.12,115.53) size=105.00x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16218 BranchSummary "But was: "OtherError"" center=(1160.12,129.18) size=110.25x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-15777 BranchName "AD-15777" center=(95.88,168.95) size=60.00x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-15777 BranchSummary "Refactor Sequencing to use a" center=(95.88,185.52) size=147.00x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-15777 BranchSummary "DirectGraphView from the orderpool." center=(95.88,199.18) size=183.75x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16190 CancelledBranchName "AD-16190" center=(72.25,238.95) size=60.00x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-16190 CancelledBranchSummary "Report the TSU lift buffer" center=(72.25,255.52) size=136.50x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16190 CancelledBranchSummary "location to the order pool" center=(72.25,269.17) size=136.50x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16250 BranchName "AD-16250" center=(376.38,238.95) size=60.00x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-16250 BranchSummary "Extend unit tests OrderPool to increase" center=(376.38,255.52) size=204.75x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16250 BranchSummary "coverage" center=(376.38,269.17) size=42.00x13.65 angle=0.00 font=10.50 background=False
+text branch-label/ad-16253 BranchName "AD-16253" center=(744.25,252.60) size=60.00x19.50 angle=0.00 font=15.00 background=False
+text branch-label/ad-16253 BranchSummary "Fix issues found in failed endurance tests" center=(744.25,269.18) size=220.50x13.65 angle=0.00 font=10.50 background=False
+text connector-label/pull-develop-into-15777-before-split ConnectorLabel "Pull develop before" center=(557.04,97.85) size=104.50x14.30 angle=0.00 font=11.00 background=False
+text connector-label/pull-develop-into-15777-before-split ConnectorLabel "OrderPool split reverse" center=(557.04,112.15) size=126.50x14.30 angle=0.00 font=11.00 background=False
+text connector-label/pull-develop-into-xxxxxx ConnectorLabel "Pull develop" center=(1313.64,35.00) size=66.00x14.30 angle=0.00 font=11.00 background=False
+text connector-label/merge-xxxxxx-into-15777 ConnectorLabel "Merge reverse reverse" center=(1441.04,132.85) size=115.50x14.30 angle=0.00 font=11.00 background=False
+text connector-label/merge-xxxxxx-into-15777 ConnectorLabel "orderpool to AD-15777" center=(1441.04,147.15) size=115.50x14.30 angle=0.00 font=11.00 background=False
+text connector-label/pull-develop-into-15777 ConnectorLabel "Pull develop" center=(1465.20,84.00) size=72.00x14.30 angle=73.30 font=11.00 background=True
+text connector-label/merge-15777-into-develop ConnectorLabel "Merge to develop" center=(1542.60,168.00) size=94.00x14.30 angle=-73.30 font=11.00 background=True
+text title Title "Branching strategy." center=(19.50,-271.90) size=152.00x20.80 angle=0.00 font=16.00 background=False
+text title ScenarioName "Scenario 3: Merge OrderPool reverse^2 to AD-15777" center=(127.25,-251.75) size=367.50x19.50 angle=0.00 font=15.00 background=False
+arrow marker/release-build Done (630.00,-2.00) (660.00,-32.00) (641.00,-32.00) (641.00,-202.00) (619.00,-202.00) (619.00,-32.00) (600.00,-32.00)
+arrow marker/lots-of-testing Done (1563.50,105.00) (1593.50,135.00) (1593.50,116.00) (1763.50,116.00) (1763.50,94.00) (1593.50,94.00) (1593.50,75.00)

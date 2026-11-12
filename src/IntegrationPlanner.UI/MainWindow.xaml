@@ -1,7 +1,59 @@
 <Window x:Class="IntegrationPlanner.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:loc="clr-namespace:IntegrationPlanner.UI.Localization"
-        Title="{loc:Loc MainWindow_Title}"
+        xmlns:rendering="clr-namespace:IntegrationPlanner.UI.Rendering"
+        xmlns:behaviors="clr-namespace:IntegrationPlanner.UI.Behaviors"
+        xmlns:vm="clr-namespace:IntegrationPlanner.UI.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="{Binding WindowTitle, Mode=OneWay}"
         Style="{StaticResource MainWindowStyle}"
-        WindowStartupLocation="CenterScreen" />
+        WindowStartupLocation="CenterScreen">
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding OpenCommand, Mode=OneTime}" Gesture="Ctrl+O" />
+        <KeyBinding Command="{Binding CopyToClipboardCommand, Mode=OneTime}" Gesture="Ctrl+Shift+C" />
+        <KeyBinding Command="{Binding ZoomInCommand, Mode=OneTime}" Gesture="Ctrl+OemPlus" />
+        <KeyBinding Command="{Binding ZoomOutCommand, Mode=OneTime}" Gesture="Ctrl+OemMinus" />
+        <KeyBinding Command="{Binding ResetZoomCommand, Mode=OneTime}" Gesture="Ctrl+D0" />
+    </Window.InputBindings>
+    <DockPanel>
+        <ToolBarTray DockPanel.Dock="Top" Style="{StaticResource MainToolBarTrayStyle}">
+            <ToolBar Style="{StaticResource MainToolBarStyle}">
+                <Button Command="{Binding OpenCommand, Mode=OneTime}" Content="{loc:Loc ToolbarOpen}" ToolTip="{loc:Loc ToolbarOpenToolTip}" />
+                <Separator />
+                <TextBlock Style="{StaticResource ToolBarLabelStyle}" Text="{loc:Loc ToolbarScenario}" />
+                <ComboBox Style="{StaticResource ScenarioComboBoxStyle}"
+                          ItemsSource="{Binding Scenarios, Mode=OneTime}"
+                          SelectedItem="{Binding SelectedScenario, Mode=TwoWay}"
+                          DisplayMemberPath="Name"
+                          AutomationProperties.Name="{loc:Loc ToolbarScenario}" />
+                <Separator />
+                <Button Command="{Binding ZoomOutCommand, Mode=OneTime}" Content="{loc:Loc ToolbarZoomOut}" ToolTip="{loc:Loc ToolbarZoomOutToolTip}" />
+                <Button Command="{Binding ResetZoomCommand, Mode=OneTime}" Content="{Binding Zoom, Mode=OneWay}" ContentStringFormat="P0" ToolTip="{loc:Loc ToolbarResetZoomToolTip}" />
+                <Button Command="{Binding ZoomInCommand, Mode=OneTime}" Content="{loc:Loc ToolbarZoomIn}" ToolTip="{loc:Loc ToolbarZoomInToolTip}" />
+                <Separator />
+                <Button Command="{Binding ExportPngCommand, Mode=OneTime}" Content="{loc:Loc ToolbarExportPng}" ToolTip="{loc:Loc ToolbarExportPngToolTip}" />
+                <Button Command="{Binding ExportSvgCommand, Mode=OneTime}" Content="{loc:Loc ToolbarExportSvg}" ToolTip="{loc:Loc ToolbarExportSvgToolTip}" />
+                <Button Command="{Binding CopyToClipboardCommand, Mode=OneTime}" Content="{loc:Loc ToolbarCopy}" ToolTip="{loc:Loc ToolbarCopyToolTip}" />
+            </ToolBar>
+        </ToolBarTray>
+        <Grid>
+            <ScrollViewer Style="{StaticResource DiagramScrollViewerStyle}"
+                          behaviors:ScrollViewerBehaviors.ZoomInCommand="{Binding ZoomInCommand, Mode=OneTime}"
+                          behaviors:ScrollViewerBehaviors.ZoomOutCommand="{Binding ZoomOutCommand, Mode=OneTime}"
+                          behaviors:ScrollViewerBehaviors.IsDragPanEnabled="True">
+                <rendering:SceneCanvas Style="{StaticResource SceneCanvasStyle}" Scene="{Binding Scene, Mode=OneWay}">
+                    <rendering:SceneCanvas.LayoutTransform>
+                        <ScaleTransform ScaleX="{Binding Zoom, Mode=OneWay}" ScaleY="{Binding Zoom, Mode=OneWay}" />
+                    </rendering:SceneCanvas.LayoutTransform>
+                </rendering:SceneCanvas>
+            </ScrollViewer>
+            <TextBlock Style="{StaticResource EmptyStateTextStyle}"
+                       Text="{loc:Loc EmptyStateText}"
+                       Visibility="{Binding Scene, Mode=OneWay, Converter={StaticResource NullToVisibleConverter}}" />
+        </Grid>
+    </DockPanel>
+</Window>
