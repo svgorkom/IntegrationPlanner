@@ -1,0 +1,29 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+coverage*.xml
+*.coverage
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.rsuser
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Temp files left by an interrupted atomic save
+*.iplan.json.*.tmp
