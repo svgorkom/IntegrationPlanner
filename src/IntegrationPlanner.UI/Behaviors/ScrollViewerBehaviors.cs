@@ -7,6 +7,7 @@ using System.Windows.Media;
 namespace IntegrationPlanner.UI.Behaviors;
 
 // View-only input handling for the diagram: Ctrl+wheel zooms through view-model commands, left-drag pans.
+// Panning starts on the bubbling press, so presses that the canvas claims for selecting or moving an item do not pan.
 public static class ScrollViewerBehaviors
 {
     public static readonly DependencyProperty ZoomInCommandProperty = DependencyProperty.RegisterAttached(
@@ -67,7 +68,7 @@ public static class ScrollViewerBehaviors
             return;
         }
 
-        viewer.PreviewMouseLeftButtonDown -= OnDragStart;
+        viewer.MouseLeftButtonDown -= OnDragStart;
         viewer.PreviewMouseMove -= OnDragMove;
         viewer.PreviewMouseLeftButtonUp -= OnDragEnd;
         viewer.LostMouseCapture -= OnLostCapture;
@@ -76,7 +77,7 @@ public static class ScrollViewerBehaviors
             return;
         }
 
-        viewer.PreviewMouseLeftButtonDown += OnDragStart;
+        viewer.MouseLeftButtonDown += OnDragStart;
         viewer.PreviewMouseMove += OnDragMove;
         viewer.PreviewMouseLeftButtonUp += OnDragEnd;
         viewer.LostMouseCapture += OnLostCapture;

@@ -27,9 +27,6 @@
   <data name="ToolbarOpenToolTip" xml:space="preserve">
     <value>Open a plan file (Ctrl+O)</value>
   </data>
-  <data name="ToolbarScenario" xml:space="preserve">
-    <value>Scenario:</value>
-  </data>
   <data name="ToolbarZoomIn" xml:space="preserve">
     <value>+</value>
   </data>
@@ -64,7 +61,7 @@
     <value>Copy the diagram to the clipboard as an image (Ctrl+Shift+C)</value>
   </data>
   <data name="EmptyStateText" xml:space="preserve">
-    <value>Open a plan file to show its diagram.</value>
+    <value>Create a new plan or open an existing one. A plan without scenarios has no diagram: add a scenario first.</value>
   </data>
   <data name="DialogOpenPlanTitle" xml:space="preserve">
     <value>Open plan</value>
@@ -101,5 +98,263 @@
   </data>
   <data name="ErrorUnexpected" xml:space="preserve">
     <value>Something went wrong. The problem has been logged. You can continue working, but if it happens again please restart Integration Planner.</value>
+  </data>
+  <data name="MainWindowTitleWithFileUnsaved" xml:space="preserve">
+    <value>{0}* - Integration Planner</value>
+  </data>
+  <data name="UntitledFileName" xml:space="preserve">
+    <value>Untitled</value>
+  </data>
+  <data name="DialogSavePlanTitle" xml:space="preserve">
+    <value>Save plan</value>
+  </data>
+  <data name="QuestionSaveChanges" xml:space="preserve">
+    <value>The plan has unsaved changes. Do you want to save them first?</value>
+  </data>
+  <data name="ErrorSaveFailed" xml:space="preserve">
+    <value>The plan could not be saved. Check that the folder exists and that you have write access. Your changes are still open.</value>
+  </data>
+  <data name="DefaultPlanTitle" xml:space="preserve">
+    <value>Untitled plan</value>
+  </data>
+  <data name="DefaultScenarioName" xml:space="preserve">
+    <value>Scenario {0}</value>
+  </data>
+  <data name="DuplicateScenarioName" xml:space="preserve">
+    <value>{0} (copy)</value>
+  </data>
+  <data name="DefaultBranchName" xml:space="preserve">
+    <value>New branch</value>
+  </data>
+  <data name="DefaultMarkerLabel" xml:space="preserve">
+    <value>New marker</value>
+  </data>
+  <data name="ChoiceNone" xml:space="preserve">
+    <value>(none)</value>
+  </data>
+  <data name="ChoiceConnectorKindPull" xml:space="preserve">
+    <value>Pull</value>
+  </data>
+  <data name="ChoiceConnectorKindMerge" xml:space="preserve">
+    <value>Merge</value>
+  </data>
+  <data name="ChoiceProgressStatePlanned" xml:space="preserve">
+    <value>Planned</value>
+  </data>
+  <data name="ChoiceProgressStateDone" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="ChoiceMarkerKindReleaseBuild" xml:space="preserve">
+    <value>Release build</value>
+  </data>
+  <data name="ChoiceMarkerKindIntegrationTest" xml:space="preserve">
+    <value>Integration test</value>
+  </data>
+  <data name="ChoiceMarkerKindTesting" xml:space="preserve">
+    <value>Testing</value>
+  </data>
+  <data name="ChoiceMarkerKindCustom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="ChoiceMarkerDirectionFromTop" xml:space="preserve">
+    <value>From top</value>
+  </data>
+  <data name="ChoiceMarkerDirectionFromBottom" xml:space="preserve">
+    <value>From bottom</value>
+  </data>
+  <data name="ChoiceMarkerDirectionFromLeft" xml:space="preserve">
+    <value>From left</value>
+  </data>
+  <data name="ChoiceMarkerDirectionFromRight" xml:space="preserve">
+    <value>From right</value>
+  </data>
+  <data name="ChoiceMarkerAnchorBranch" xml:space="preserve">
+    <value>Branch at a step</value>
+  </data>
+  <data name="ChoiceMarkerAnchorConnector" xml:space="preserve">
+    <value>Pull or merge</value>
+  </data>
+  <data name="ChoiceConnectorFormat" xml:space="preserve">
+    <value>{0}: {1} to {2} at step {3}</value>
+  </data>
+  <data name="ToolbarNew" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="ToolbarNewToolTip" xml:space="preserve">
+    <value>Create a new plan (Ctrl+N)</value>
+  </data>
+  <data name="ToolbarSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="ToolbarSaveToolTip" xml:space="preserve">
+    <value>Save the plan (Ctrl+S)</value>
+  </data>
+  <data name="ToolbarSaveAs" xml:space="preserve">
+    <value>Save as</value>
+  </data>
+  <data name="ToolbarSaveAsToolTip" xml:space="preserve">
+    <value>Save the plan to another file (Ctrl+Shift+S)</value>
+  </data>
+  <data name="ToolbarAddBranch" xml:space="preserve">
+    <value>Add branch</value>
+  </data>
+  <data name="ToolbarAddBranchToolTip" xml:space="preserve">
+    <value>Add a branch to the plan and a lane for it to the current scenario</value>
+  </data>
+  <data name="ToolbarAddPull" xml:space="preserve">
+    <value>Add pull</value>
+  </data>
+  <data name="ToolbarAddPullToolTip" xml:space="preserve">
+    <value>Add a pull between two lanes of the current scenario</value>
+  </data>
+  <data name="ToolbarAddMerge" xml:space="preserve">
+    <value>Add merge</value>
+  </data>
+  <data name="ToolbarAddMergeToolTip" xml:space="preserve">
+    <value>Add a merge between two lanes of the current scenario</value>
+  </data>
+  <data name="ToolbarAddMarker" xml:space="preserve">
+    <value>Add marker</value>
+  </data>
+  <data name="ToolbarAddMarkerToolTip" xml:space="preserve">
+    <value>Add a marker to the selected lane or pull/merge</value>
+  </data>
+  <data name="ToolbarDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ToolbarDeleteToolTip" xml:space="preserve">
+    <value>Delete the selected item (Del). Deleting a branch removes it from every scenario.</value>
+  </data>
+  <data name="ToolbarUndo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="ToolbarUndoToolTip" xml:space="preserve">
+    <value>Undo the last change (Ctrl+Z)</value>
+  </data>
+  <data name="ToolbarRedo" xml:space="preserve">
+    <value>Redo</value>
+  </data>
+  <data name="ToolbarRedoToolTip" xml:space="preserve">
+    <value>Redo the last undone change (Ctrl+Y)</value>
+  </data>
+  <data name="ExplorerScenarios" xml:space="preserve">
+    <value>Scenarios</value>
+  </data>
+  <data name="ExplorerBranches" xml:space="preserve">
+    <value>Branches</value>
+  </data>
+  <data name="ExplorerAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="ExplorerAddScenarioToolTip" xml:space="preserve">
+    <value>Add an empty scenario</value>
+  </data>
+  <data name="ExplorerDuplicateScenario" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="ExplorerDuplicateScenarioToolTip" xml:space="preserve">
+    <value>Add a copy of the current scenario</value>
+  </data>
+  <data name="ExplorerDeleteScenario" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ExplorerDeleteScenarioToolTip" xml:space="preserve">
+    <value>Delete the current scenario</value>
+  </data>
+  <data name="ExplorerAddBranchToolTip" xml:space="preserve">
+    <value>Add a branch to the plan and a lane for it to the current scenario</value>
+  </data>
+  <data name="PropertiesPlan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="PropertiesScenario" xml:space="preserve">
+    <value>Current scenario</value>
+  </data>
+  <data name="PropertiesBranch" xml:space="preserve">
+    <value>Branch (all scenarios)</value>
+  </data>
+  <data name="PropertiesLane" xml:space="preserve">
+    <value>Lane (current scenario)</value>
+  </data>
+  <data name="PropertiesLaneHint" xml:space="preserve">
+    <value>Leave End step or Fork step empty when not needed.</value>
+  </data>
+  <data name="PropertiesConnector" xml:space="preserve">
+    <value>Pull or merge</value>
+  </data>
+  <data name="PropertiesMarker" xml:space="preserve">
+    <value>Marker</value>
+  </data>
+  <data name="PropertiesDragHint" xml:space="preserve">
+    <value>Drag lanes up or down, and pulls, merges and markers left or right.</value>
+  </data>
+  <data name="FieldTitle" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="FieldName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="FieldStepCount" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="FieldSummary" xml:space="preserve">
+    <value>Summary</value>
+  </data>
+  <data name="FieldIsMainline" xml:space="preserve">
+    <value>Mainline</value>
+  </data>
+  <data name="FieldIsCancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="FieldIsInScenario" xml:space="preserve">
+    <value>Shown in this scenario</value>
+  </data>
+  <data name="FieldOrder" xml:space="preserve">
+    <value>Lane position</value>
+  </data>
+  <data name="FieldStartStep" xml:space="preserve">
+    <value>Start step</value>
+  </data>
+  <data name="FieldEndStep" xml:space="preserve">
+    <value>End step</value>
+  </data>
+  <data name="FieldShowFork" xml:space="preserve">
+    <value>Show fork</value>
+  </data>
+  <data name="FieldForkFrom" xml:space="preserve">
+    <value>Forked from</value>
+  </data>
+  <data name="FieldForkStep" xml:space="preserve">
+    <value>Fork step</value>
+  </data>
+  <data name="FieldKind" xml:space="preserve">
+    <value>Kind</value>
+  </data>
+  <data name="FieldFrom" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="FieldTo" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="FieldStep" xml:space="preserve">
+    <value>Step</value>
+  </data>
+  <data name="FieldLabel" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="FieldState" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="FieldDirection" xml:space="preserve">
+    <value>Direction</value>
+  </data>
+  <data name="FieldAnchor" xml:space="preserve">
+    <value>Attached to</value>
+  </data>
+  <data name="FieldAnchorBranch" xml:space="preserve">
+    <value>Branch</value>
+  </data>
+  <data name="FieldAnchorConnector" xml:space="preserve">
+    <value>Pull or merge</value>
   </data>
 </root>

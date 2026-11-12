@@ -13,6 +13,9 @@
     <SolidColorBrush x:Key="CancelledBrush" Color="{StaticResource CancelledColor}" />
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
     <SolidColorBrush x:Key="CanvasSurroundBrush" Color="{StaticResource CanvasSurroundColor}" />
+    <SolidColorBrush x:Key="SelectionHighlightBrush" Color="#66F0A030" />
+    <SolidColorBrush x:Key="PanelBorderBrush" Color="#D0D7DB" />
+    <SolidColorBrush x:Key="HintBrush" Color="#5F6B72" />
 
     <!-- Diagram look shared by screen rendering, PNG/clipboard export and SVG export. -->
     <rendering:ScenePalette x:Key="ScenePalette"
@@ -29,6 +32,7 @@
                             DashGap="4" />
 
     <converters:NullToVisibilityConverter x:Key="NullToVisibleConverter" NullValue="Visible" NotNullValue="Collapsed" />
+    <BooleanToVisibilityConverter x:Key="TrueToVisibleConverter" />
 
     <Style x:Key="MainWindowStyle" TargetType="Window">
         <Setter Property="Width" Value="1280" />
@@ -53,9 +57,78 @@
         <Setter Property="Margin" Value="4,0" />
     </Style>
 
-    <Style x:Key="ScenarioComboBoxStyle" TargetType="ComboBox">
-        <Setter Property="MinWidth" Value="220" />
-        <Setter Property="Margin" Value="2,0" />
+    <Style x:Key="SidePanelStyle" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
+        <Setter Property="Padding" Value="8" />
+    </Style>
+
+    <Style x:Key="ExplorerPanelStyle" TargetType="Border" BasedOn="{StaticResource SidePanelStyle}">
+        <Setter Property="Width" Value="220" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+    </Style>
+
+    <Style x:Key="PropertyPanelStyle" TargetType="Border" BasedOn="{StaticResource SidePanelStyle}">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="BorderThickness" Value="1,0,0,0" />
+    </Style>
+
+    <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Margin" Value="0,8,0,4" />
+    </Style>
+
+    <Style x:Key="PanelButtonRowStyle" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <Style x:Key="PanelButtonStyle" TargetType="Button">
+        <Setter Property="Padding" Value="8,2" />
+        <Setter Property="Margin" Value="0,0,4,0" />
+    </Style>
+
+    <Style x:Key="ExplorerListBoxStyle" TargetType="ListBox">
+        <Setter Property="DisplayMemberPath" Value="Name" />
+        <Setter Property="MinHeight" Value="60" />
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PropertyLabelStyle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,6,0,2" />
+    </Style>
+
+    <Style x:Key="HintTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource HintBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Margin" Value="0,8,0,0" />
+    </Style>
+
+    <!-- Each committed change is one plan-level undo step, so the text box keeps no undo history of its own. -->
+    <Style x:Key="PropertyTextBoxStyle" TargetType="TextBox">
+        <Setter Property="IsUndoEnabled" Value="False" />
+        <Setter Property="Padding" Value="2" />
+    </Style>
+
+    <Style x:Key="PropertyMultilineTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource PropertyTextBoxStyle}">
+        <Setter Property="AcceptsReturn" Value="True" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="MinHeight" Value="54" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+    </Style>
+
+    <Style x:Key="PropertyComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="DisplayMemberPath" Value="Text" />
+    </Style>
+
+    <Style x:Key="PropertyCheckBoxStyle" TargetType="CheckBox">
+        <Setter Property="Margin" Value="0,6,0,0" />
     </Style>
 
     <Style x:Key="DiagramScrollViewerStyle" TargetType="ScrollViewer">
@@ -67,6 +140,7 @@
 
     <Style x:Key="SceneCanvasStyle" TargetType="rendering:SceneCanvas">
         <Setter Property="Palette" Value="{StaticResource ScenePalette}" />
+        <Setter Property="HighlightBrush" Value="{StaticResource SelectionHighlightBrush}" />
         <Setter Property="Margin" Value="16" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Top" />
@@ -78,5 +152,8 @@
         <Setter Property="FontSize" Value="16" />
         <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
         <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="MaxWidth" Value="420" />
     </Style>
 </ResourceDictionary>

@@ -13,7 +13,13 @@
         Style="{StaticResource MainWindowStyle}"
         WindowStartupLocation="CenterScreen">
     <Window.InputBindings>
+        <KeyBinding Command="{Binding NewCommand, Mode=OneTime}" Gesture="Ctrl+N" />
         <KeyBinding Command="{Binding OpenCommand, Mode=OneTime}" Gesture="Ctrl+O" />
+        <KeyBinding Command="{Binding SaveCommand, Mode=OneTime}" Gesture="Ctrl+S" />
+        <KeyBinding Command="{Binding SaveAsCommand, Mode=OneTime}" Gesture="Ctrl+Shift+S" />
+        <KeyBinding Command="{Binding UndoCommand, Mode=OneTime}" Gesture="Ctrl+Z" />
+        <KeyBinding Command="{Binding RedoCommand, Mode=OneTime}" Gesture="Ctrl+Y" />
+        <KeyBinding Command="{Binding DeleteSelectionCommand, Mode=OneTime}" Gesture="Delete" />
         <KeyBinding Command="{Binding CopyToClipboardCommand, Mode=OneTime}" Gesture="Ctrl+Shift+C" />
         <KeyBinding Command="{Binding ZoomInCommand, Mode=OneTime}" Gesture="Ctrl+OemPlus" />
         <KeyBinding Command="{Binding ZoomOutCommand, Mode=OneTime}" Gesture="Ctrl+OemMinus" />
@@ -22,14 +28,19 @@
     <DockPanel>
         <ToolBarTray DockPanel.Dock="Top" Style="{StaticResource MainToolBarTrayStyle}">
             <ToolBar Style="{StaticResource MainToolBarStyle}">
+                <Button Command="{Binding NewCommand, Mode=OneTime}" Content="{loc:Loc ToolbarNew}" ToolTip="{loc:Loc ToolbarNewToolTip}" />
                 <Button Command="{Binding OpenCommand, Mode=OneTime}" Content="{loc:Loc ToolbarOpen}" ToolTip="{loc:Loc ToolbarOpenToolTip}" />
+                <Button Command="{Binding SaveCommand, Mode=OneTime}" Content="{loc:Loc ToolbarSave}" ToolTip="{loc:Loc ToolbarSaveToolTip}" />
+                <Button Command="{Binding SaveAsCommand, Mode=OneTime}" Content="{loc:Loc ToolbarSaveAs}" ToolTip="{loc:Loc ToolbarSaveAsToolTip}" />
                 <Separator />
-                <TextBlock Style="{StaticResource ToolBarLabelStyle}" Text="{loc:Loc ToolbarScenario}" />
-                <ComboBox Style="{StaticResource ScenarioComboBoxStyle}"
-                          ItemsSource="{Binding Scenarios, Mode=OneTime}"
-                          SelectedItem="{Binding SelectedScenario, Mode=TwoWay}"
-                          DisplayMemberPath="Name"
-                          AutomationProperties.Name="{loc:Loc ToolbarScenario}" />
+                <Button Command="{Binding AddBranchCommand, Mode=OneTime}" Content="{loc:Loc ToolbarAddBranch}" ToolTip="{loc:Loc ToolbarAddBranchToolTip}" />
+                <Button Command="{Binding AddPullCommand, Mode=OneTime}" Content="{loc:Loc ToolbarAddPull}" ToolTip="{loc:Loc ToolbarAddPullToolTip}" />
+                <Button Command="{Binding AddMergeCommand, Mode=OneTime}" Content="{loc:Loc ToolbarAddMerge}" ToolTip="{loc:Loc ToolbarAddMergeToolTip}" />
+                <Button Command="{Binding AddMarkerCommand, Mode=OneTime}" Content="{loc:Loc ToolbarAddMarker}" ToolTip="{loc:Loc ToolbarAddMarkerToolTip}" />
+                <Button Command="{Binding DeleteSelectionCommand, Mode=OneTime}" Content="{loc:Loc ToolbarDelete}" ToolTip="{loc:Loc ToolbarDeleteToolTip}" />
+                <Separator />
+                <Button Command="{Binding UndoCommand, Mode=OneTime}" Content="{loc:Loc ToolbarUndo}" ToolTip="{loc:Loc ToolbarUndoToolTip}" />
+                <Button Command="{Binding RedoCommand, Mode=OneTime}" Content="{loc:Loc ToolbarRedo}" ToolTip="{loc:Loc ToolbarRedoToolTip}" />
                 <Separator />
                 <Button Command="{Binding ZoomOutCommand, Mode=OneTime}" Content="{loc:Loc ToolbarZoomOut}" ToolTip="{loc:Loc ToolbarZoomOutToolTip}" />
                 <Button Command="{Binding ResetZoomCommand, Mode=OneTime}" Content="{Binding Zoom, Mode=OneWay}" ContentStringFormat="P0" ToolTip="{loc:Loc ToolbarResetZoomToolTip}" />
@@ -40,12 +51,62 @@
                 <Button Command="{Binding CopyToClipboardCommand, Mode=OneTime}" Content="{loc:Loc ToolbarCopy}" ToolTip="{loc:Loc ToolbarCopyToolTip}" />
             </ToolBar>
         </ToolBarTray>
+
+        <Border DockPanel.Dock="Left" Style="{StaticResource ExplorerPanelStyle}" IsEnabled="{Binding HasPlan, Mode=OneWay}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="2*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc ExplorerScenarios}" />
+                <StackPanel Grid.Row="1" Style="{StaticResource PanelButtonRowStyle}">
+                    <Button Style="{StaticResource PanelButtonStyle}" Command="{Binding AddScenarioCommand, Mode=OneTime}" Content="{loc:Loc ExplorerAdd}" ToolTip="{loc:Loc ExplorerAddScenarioToolTip}" />
+                    <Button Style="{StaticResource PanelButtonStyle}" Command="{Binding DuplicateScenarioCommand, Mode=OneTime}" Content="{loc:Loc ExplorerDuplicateScenario}" ToolTip="{loc:Loc ExplorerDuplicateScenarioToolTip}" />
+                    <Button Style="{StaticResource PanelButtonStyle}" Command="{Binding DeleteScenarioCommand, Mode=OneTime}" Content="{loc:Loc ExplorerDeleteScenario}" ToolTip="{loc:Loc ExplorerDeleteScenarioToolTip}" />
+                </StackPanel>
+                <ListBox Grid.Row="2"
+                         Style="{StaticResource ExplorerListBoxStyle}"
+                         ItemsSource="{Binding Scenarios, Mode=OneTime}"
+                         SelectedItem="{Binding SelectedScenario, Mode=TwoWay}"
+                         AutomationProperties.Name="{loc:Loc ExplorerScenarios}" />
+                <TextBlock Grid.Row="3" Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc ExplorerBranches}" />
+                <StackPanel Grid.Row="4" Style="{StaticResource PanelButtonRowStyle}">
+                    <Button Style="{StaticResource PanelButtonStyle}" Command="{Binding AddBranchCommand, Mode=OneTime}" Content="{loc:Loc ExplorerAdd}" ToolTip="{loc:Loc ExplorerAddBranchToolTip}" />
+                </StackPanel>
+                <ListBox Grid.Row="5"
+                         Style="{StaticResource ExplorerListBoxStyle}"
+                         ItemsSource="{Binding Branches, Mode=OneTime}"
+                         SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
+                         AutomationProperties.Name="{loc:Loc ExplorerBranches}" />
+            </Grid>
+        </Border>
+
+        <Border DockPanel.Dock="Right" Style="{StaticResource PropertyPanelStyle}" IsEnabled="{Binding HasPlan, Mode=OneWay}">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource HintTextStyle}" Text="{loc:Loc PropertiesDragHint}" />
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ContentControl Content="{Binding SelectedProperties, Mode=OneWay}" Focusable="False" />
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
         <Grid>
             <ScrollViewer Style="{StaticResource DiagramScrollViewerStyle}"
                           behaviors:ScrollViewerBehaviors.ZoomInCommand="{Binding ZoomInCommand, Mode=OneTime}"
                           behaviors:ScrollViewerBehaviors.ZoomOutCommand="{Binding ZoomOutCommand, Mode=OneTime}"
                           behaviors:ScrollViewerBehaviors.IsDragPanEnabled="True">
-                <rendering:SceneCanvas Style="{StaticResource SceneCanvasStyle}" Scene="{Binding Scene, Mode=OneWay}">
+                <rendering:SceneCanvas Style="{StaticResource SceneCanvasStyle}"
+                                       Scene="{Binding Scene, Mode=OneWay}"
+                                       SelectCommand="{Binding SelectElementCommand, Mode=OneTime}"
+                                       MoveCommand="{Binding MoveElementCommand, Mode=OneTime}"
+                                       SelectedKeys="{Binding SelectedKeys, Mode=OneWay}"
+                                       DragTargets="{Binding DragTargets, Mode=OneWay}"
+                                       HorizontalSnap="{Binding HorizontalSnap, Mode=OneTime}"
+                                       VerticalSnap="{Binding VerticalSnap, Mode=OneTime}">
                     <rendering:SceneCanvas.LayoutTransform>
                         <ScaleTransform ScaleX="{Binding Zoom, Mode=OneWay}" ScaleY="{Binding Zoom, Mode=OneWay}" />
                     </rendering:SceneCanvas.LayoutTransform>

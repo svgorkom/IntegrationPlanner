@@ -39,6 +39,19 @@ dotnet run --project src\IntegrationPlanner.UI\IntegrationPlanner.UI.csproj -- s
 
 The optional argument is a plan file to open at start-up. Logs go to `%LocalAppData%\IntegrationPlanner\logs` (daily files, 7 kept).
 
+## Editing
+
+| Action | How |
+|---|---|
+| New / Open / Save / Save As | Toolbar, or Ctrl+N / Ctrl+O / Ctrl+S / Ctrl+Shift+S. Unsaved changes are marked `*` in the title and asked about before New, Open and closing. |
+| Scenarios, branch catalogue | Explorer on the left: add, duplicate, delete scenarios; add and select branches. |
+| Add items | Toolbar: Add branch, Add pull, Add merge, Add marker. |
+| Change items | Select on the canvas or in the explorer, edit in the property panel on the right (commits on leaving the field or Enter). |
+| Drag | Drag a lane up/down to reorder; drag a pull, merge or branch-anchored marker left/right to change its step. Drag empty space to pan. |
+| Delete, undo, redo | Del, Ctrl+Z, Ctrl+Y (or the toolbar). |
+
+Details: `docs/ApplicationFunctionality.md`.
+
 ## Layout
 
 | Path | Contents |
@@ -46,6 +59,6 @@ The optional argument is a plan file to open at start-up. Logs go to `%LocalAppD
 | `src/IntegrationPlanner.Core` | Model and undoable editing commands |
 | `src/IntegrationPlanner.Layout` | Pure diagram layout: scenario -> `DiagramScene` |
 | `src/IntegrationPlanner.Persistence` | `*.iplan.json` load/save |
-| `src/IntegrationPlanner.UI` | WPF viewer (rendering, zoom/pan, export), logging and composition root |
+| `src/IntegrationPlanner.UI` | WPF editor (rendering, editing, zoom/pan, export), logging and composition root |
 | `tests/` | xUnit test projects |
 | `samples/scenario3.iplan.json` | Scenario 3 of the reference diagram |

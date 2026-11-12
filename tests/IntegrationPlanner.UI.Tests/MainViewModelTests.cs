@@ -1,6 +1,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using IntegrationPlanner.Core.Integrity;
+using IntegrationPlanner.Layout;
 using IntegrationPlanner.Persistence;
 using IntegrationPlanner.UI.Export;
 using IntegrationPlanner.UI.Localization;
@@ -255,7 +256,7 @@ public sealed class MainViewModelTests
     }
 
     private MainViewModel CreateViewModel() =>
-        new(_store, _layout, _dialogs, _messages, _exporter, NullLogger<MainViewModel>.Instance);
+        new(_store, _layout, _dialogs, _messages, _exporter, LayoutOptions.Default, NullLogger<MainViewModel>.Instance);
 
     private async Task<MainViewModel> CreateViewModelWithPlanAsync()
     {

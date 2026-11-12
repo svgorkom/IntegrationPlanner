@@ -1,0 +1,302 @@
+using System.Collections.ObjectModel;
+using IntegrationPlanner.Core.Editing;
+using IntegrationPlanner.Core.Editing.Commands;
+using IntegrationPlanner.Core.Model;
+using IntegrationPlanner.UI.Editing;
+using IntegrationPlanner.UI.ViewModels.Properties;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace IntegrationPlanner.UI.ViewModels;
+
+// Editing: selection, property panel, toolbar actions and canvas drag. Every action is one undoable command.
+public sealed partial class MainViewModel
+{
+    private EditorSelection? _selection;
+    private bool _isSynchronizing;
+    private bool _isSelecting;
+
+    [ObservableProperty]
+    private BranchItem? _selectedBranch;
+
+    [ObservableProperty]
+    private PropertiesViewModel? _selectedProperties;
+
+    [ObservableProperty]
+    private IReadOnlyCollection<string> _selectedKeys = [];
+
+    [ObservableProperty]
+    private IReadOnlyDictionary<string, SceneDragTarget> _dragTargets = new Dictionary<string, SceneDragTarget>();
+
+    public ObservableCollection<BranchItem> Branches { get; } = [];
+
+    public double HorizontalSnap => _layoutOptions.StepWidth;
+
+    public double VerticalSnap => _layoutOptions.LaneSpacing;
+
+    private Scenario? CurrentScenario =>
+        _editor is not null && SelectedScenario is not null ? _editor.Current.Scenarios.Find(scenario => scenario.Id == SelectedScenario.Id) : null;
+
+    [RelayCommand(CanExecute = nameof(CanUndo))]
+    private void Undo() => _editor!.Undo();
+
+    [RelayCommand(CanExecute = nameof(CanRedo))]
+    private void Redo() => _editor!.Redo();
+
+    [RelayCommand(CanExecute = nameof(HasPlan))]
+    private void AddScenario()
+    {
+        Scenario scenario = PlanItemFactory.NewScenario(_editor!.Current, CurrentScenario);
+        _editor.Execute(new AddScenarioCommand(scenario));
+        SelectedScenario = Scenarios.FirstOrDefault(item => item.Id == scenario.Id);
+    }
+
+    [RelayCommand(CanExecute = nameof(HasScenario))]
+    private void DuplicateScenario()
+    {
+        Scenario scenario = PlanItemFactory.Duplicate(CurrentScenario!);
+        _editor!.Execute(new AddScenarioCommand(scenario));
+        SelectedScenario = Scenarios.FirstOrDefault(item => item.Id == scenario.Id);
+    }
+
+    [RelayCommand(CanExecute = nameof(HasScenario))]
+    private void DeleteScenario() => _editor!.Execute(new DeleteScenarioCommand(SelectedScenario!.Id));
+
+    [RelayCommand(CanExecute = nameof(HasPlan))]
+    private void AddBranch()
+    {
+        BranchId branchId = BranchId.New();
+        _editor!.Execute(PlanItemFactory.AddBranch(_editor.Current, CurrentScenario?.Id, branchId));
+        SetSelection(new BranchSelection(branchId));
+    }
+
+    [RelayCommand(CanExecute = nameof(HasLanes))]
+    private void AddPull() => AddConnector(ConnectorKind.Pull);
+
+    [RelayCommand(CanExecute = nameof(HasLanes))]
+    private void AddMerge() => AddConnector(ConnectorKind.Merge);
+
+    [RelayCommand(CanExecute = nameof(HasLanes))]
+    private void AddMarker()
+    {
+        Scenario scenario = CurrentScenario!;
+        Marker? marker = PlanItemFactory.NewMarker(scenario, _selection);
+        if (marker is null)
+        {
+            return;
+        }
+
+        _editor!.Execute(new AddMarkerCommand(scenario.Id, marker));
+        SetSelection(new MarkerSelection(marker.Id));
+    }
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void DeleteSelection()
+    {
+        IPlanCommand? command = (_selection, CurrentScenario) switch
+        {
+            (BranchSelection branch, _) => new DeleteBranchCommand(branch.BranchId),
+            (ConnectorSelection connector, Scenario scenario) => new DeleteConnectorCommand(scenario.Id, connector.ConnectorId),
+            (MarkerSelection marker, Scenario scenario) => new DeleteMarkerCommand(scenario.Id, marker.MarkerId),
+            _ => null,
+        };
+        if (command is not null)
+        {
+            _editor!.Execute(command);
+        }
+    }
+
+    [RelayCommand]
+    private void SelectElement(string? key) => SetSelection(SceneSelection.FromKey(key));
+
+    [RelayCommand]
+    private void MoveElement(SceneMove? move)
+    {
+        if (move is null || CurrentScenario is not Scenario scenario)
+        {
+            return;
+        }
+
+        IPlanCommand? command = DragPlanner.CommandFor(scenario, move, _layoutOptions);
+        if (command is not null)
+        {
+            _editor!.Execute(command);
+        }
+    }
+
+    private bool CanUndo() => _editor?.CanUndo == true;
+
+    private bool CanRedo() => _editor?.CanRedo == true;
+
+    private bool HasScenario() => CurrentScenario is not null;
+
+    private bool HasLanes() => CurrentScenario?.Lanes.IsEmpty == false;
+
+    private bool HasSelection() => _selection is not null;
+
+    private void AddConnector(ConnectorKind kind)
+    {
+        Scenario scenario = CurrentScenario!;
+        BranchId? selectedBranchId = _selection is BranchSelection branch ? branch.BranchId : null;
+        Connector? connector = PlanItemFactory.NewConnector(_editor!.Current, scenario, kind, selectedBranchId);
+        if (connector is null)
+        {
+            return;
+        }
+
+        _editor.Execute(new AddConnectorCommand(scenario.Id, connector));
+        SetSelection(new ConnectorSelection(connector.Id));
+    }
+
+    partial void OnSelectedBranchChanged(BranchItem? value)
+    {
+        if (_isSynchronizing || _isSelecting || value is null)
+        {
+            return;
+        }
+
+        SetSelection(new BranchSelection(value.Id));
+    }
+
+    private void OnEditorChanged(object? sender, EventArgs e) => Synchronize();
+
+    // Brings lists, scene, selection and command states in line with the editor's current plan.
+    private void Synchronize()
+    {
+        Plan plan = _editor!.Current;
+        ScenarioId? previousScenarioId = SelectedScenario?.Id;
+        _isSynchronizing = true;
+        try
+        {
+            SynchronizeItems(Scenarios, plan.Scenarios, scenario => scenario.Id, item => item.Id, scenario => new ScenarioItem(scenario.Id, scenario.Name), (item, scenario) => item.Name = scenario.Name);
+            SynchronizeItems(Branches, plan.Branches, branch => branch.Id, item => item.Id, branch => new BranchItem(branch.Id, Choices.BranchText(branch)), (item, branch) => item.Name = Choices.BranchText(branch));
+            if (SelectedScenario is null || !Scenarios.Contains(SelectedScenario))
+            {
+                SelectedScenario = Scenarios.FirstOrDefault();
+            }
+        }
+        finally
+        {
+            _isSynchronizing = false;
+        }
+
+        Relayout();
+        if (SelectedScenario?.Id != previousScenarioId || SelectedProperties?.Refresh() != true)
+        {
+            SetSelection(_selection);
+        }
+        else
+        {
+            SynchronizeSelectedBranch();
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+        OnPropertyChanged(nameof(WindowTitle));
+        UpdateCommandStates();
+    }
+
+    private void Relayout()
+    {
+        Scenario? scenario = CurrentScenario;
+        DragTargets = scenario is null ? new Dictionary<string, SceneDragTarget>() : DragPlanner.TargetsFor(scenario);
+        Scene = scenario is null ? null : _layoutEngine.Layout(_editor!.Current, scenario.Id);
+    }
+
+    private void SetSelection(EditorSelection? selection)
+    {
+        _selection = selection is not null && Exists(selection) ? selection : null;
+        SynchronizeSelectedBranch();
+        SelectedKeys = SceneSelection.KeysOf(_selection);
+        SelectedProperties = CreateProperties(_selection);
+        DeleteSelectionCommand.NotifyCanExecuteChanged();
+    }
+
+    private void SynchronizeSelectedBranch()
+    {
+        _isSelecting = true;
+        try
+        {
+            SelectedBranch = _selection is BranchSelection branch ? Branches.FirstOrDefault(item => item.Id == branch.BranchId) : null;
+        }
+        finally
+        {
+            _isSelecting = false;
+        }
+    }
+
+    private bool Exists(EditorSelection selection) => selection switch
+    {
+        BranchSelection branch => _editor?.Current.Branches.Exists(item => item.Id == branch.BranchId) == true,
+        ConnectorSelection connector => CurrentScenario?.Connectors.Exists(item => item.Id == connector.ConnectorId) == true,
+        MarkerSelection marker => CurrentScenario?.Markers.Exists(item => item.Id == marker.MarkerId) == true,
+        _ => false,
+    };
+
+    private PropertiesViewModel? CreateProperties(EditorSelection? selection)
+    {
+        if (_editor is null)
+        {
+            return null;
+        }
+
+        ScenarioId? scenarioId = CurrentScenario?.Id;
+        return (selection, scenarioId) switch
+        {
+            (BranchSelection branch, _) => new BranchPropertiesViewModel(_editor, scenarioId, branch.BranchId),
+            (ConnectorSelection connector, ScenarioId id) => new ConnectorPropertiesViewModel(_editor, id, connector.ConnectorId),
+            (MarkerSelection marker, ScenarioId id) => new MarkerPropertiesViewModel(_editor, id, marker.MarkerId),
+            _ => new PlanPropertiesViewModel(_editor, scenarioId),
+        };
+    }
+
+    private void UpdateCommandStates()
+    {
+        foreach (IRelayCommand command in new IRelayCommand[]
+        {
+            SaveCommand, SaveAsCommand, UndoCommand, RedoCommand, AddScenarioCommand, DuplicateScenarioCommand, DeleteScenarioCommand,
+            AddBranchCommand, AddPullCommand, AddMergeCommand, AddMarkerCommand, DeleteSelectionCommand,
+        })
+        {
+            command.NotifyCanExecuteChanged();
+        }
+    }
+
+    // Updates the list in place so that bound selections survive renames and reorders.
+    private static void SynchronizeItems<TModel, TItem, TId>(
+        ObservableCollection<TItem> items,
+        IReadOnlyList<TModel> models,
+        Func<TModel, TId> modelId,
+        Func<TItem, TId> itemId,
+        Func<TModel, TItem> create,
+        Action<TItem, TModel> update)
+    {
+        for (int index = 0; index < models.Count; index++)
+        {
+            TModel model = models[index];
+            TId id = modelId(model);
+            int existing = -1;
+            for (int candidate = index; candidate < items.Count && existing < 0; candidate++)
+            {
+                existing = EqualityComparer<TId>.Default.Equals(itemId(items[candidate]), id) ? candidate : -1;
+            }
+
+            if (existing < 0)
+            {
+                items.Insert(index, create(model));
+                continue;
+            }
+
+            if (existing != index)
+            {
+                items.Move(existing, index);
+            }
+
+            update(items[index], model);
+        }
+
+        while (items.Count > models.Count)
+        {
+            items.RemoveAt(items.Count - 1);
+        }
+    }
+}

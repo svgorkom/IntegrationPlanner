@@ -21,6 +21,9 @@ Reference diagram: `docs/reference/branching-strategy-scenario3.png`.
 | D13 | Jira/PR integration deferred to a later extension. |
 | D14 | UI English only; all strings in `Strings.resx`. |
 | D15 | WPF on .NET 10. Old `.github`/`.claude` scaffolding removed. |
+| D16 | (P3, user) Canvas drag: left-drag on an item moves it; left-drag on empty space pans. Lanes move vertically (`Order`); connectors and branch-anchored markers move horizontally (`Step`). Nothing else is draggable. |
+| D17 | (P3, user) No help function; help pages dropped from scope. |
+| D18 | (P3, user) New, Save and Save As; unsaved changes prompt (Yes (save) / No (discard) / Cancel) before New, Open and closing the app. |
 
 ## 1. Scope
 | In scope (v1) | Out of scope | Revisit when |
@@ -64,10 +67,10 @@ Simplified from v0.1: no Application/ports layer and no audit, because without r
 - Label collision pass; deterministic output.
 
 ## 5. UI
-- Left: plan explorer (scenarios, branch catalogue). Centre: canvas (zoom/pan, select, drag steps/lanes). Right: property panel for the selection.
-- Toolbar: New/Open/Save, Add branch, Add pull, Add merge, Add marker, Undo/Redo, Export PNG/SVG, Copy.
+- Left: plan explorer (scenarios, branch catalogue). Centre: canvas (zoom/pan, select, drag steps/lanes, D16). Right: property panel for the selection.
+- Toolbar: New/Open/Save/Save As, Add branch, Add pull, Add merge, Add marker, Delete, Undo/Redo, Export PNG/SVG, Copy.
 - Strings in `Strings.resx`; styles/colours in `Themes/Theme.xaml` (teal `#1F5670`-like, red for cancelled).
-- Help: `Help/*.md` pages shown in a Help window (Plans & scenarios, Branches & lanes, Pulls & merges, Markers, Export).
+- No help pages (D17).
 
 ## 6. Failure handling
 | Case | Behaviour |
@@ -75,6 +78,7 @@ Simplified from v0.1: no Application/ports layer and no audit, because without r
 | Corrupt/newer-schema file | Not loaded, clear message, file untouched |
 | Dangling references in file | Dropped and reported |
 | Save/export fails | Original intact, temp removed, message shown |
+| Unsaved changes on New, Open or close | Asked: Yes (save) / No (discard) / Cancel (D18); a failed or cancelled save keeps the plan open |
 | Unhandled exception | Logged (Microsoft.Extensions.Logging, file sink), friendly dialog, no stack trace shown |
 
 ## 7. Tests
@@ -90,7 +94,7 @@ Simplified from v0.1: no Application/ports layer and no audit, because without r
 |---|---|---|
 | P1 | Solution skeleton, Core model + commands + undo/redo, Persistence, `samples/scenario3.iplan.json` (screenshot), docs (`DomainModel.md`, `ApplicationFunctionality.md`, README), CI | Build with zero warnings; Core + Persistence tests pass |
 | P2 | Layout + read-only WPF rendering of the sample; PNG/SVG/clipboard | Layout tests pass; visual match with screenshot |
-| P3 | Editing UI (forms + drag), scenarios management, help | Tests pass; manual walkthrough |
+| P3 | Editing UI (forms + drag), scenarios management, New/Save/Save As (help dropped, D17) | Tests pass; manual walkthrough |
 | Later | Jira/PR sync | Separate design |
 
 DoD per phase: `dotnet build IntegrationPlanner.slnx` zero warnings; `dotnet test` per affected test project passes; docs updated.

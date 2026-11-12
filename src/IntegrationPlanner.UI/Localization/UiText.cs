@@ -38,6 +38,58 @@ public static class UiText
 
     public static string ErrorUnexpected => Get(nameof(ErrorUnexpected));
 
+    public static string MainWindowTitleWithFileUnsaved => Get(nameof(MainWindowTitleWithFileUnsaved));
+
+    public static string UntitledFileName => Get(nameof(UntitledFileName));
+
+    public static string DialogSavePlanTitle => Get(nameof(DialogSavePlanTitle));
+
+    public static string QuestionSaveChanges => Get(nameof(QuestionSaveChanges));
+
+    public static string ErrorSaveFailed => Get(nameof(ErrorSaveFailed));
+
+    public static string DefaultPlanTitle => Get(nameof(DefaultPlanTitle));
+
+    public static string DefaultScenarioName => Get(nameof(DefaultScenarioName));
+
+    public static string DuplicateScenarioName => Get(nameof(DuplicateScenarioName));
+
+    public static string DefaultBranchName => Get(nameof(DefaultBranchName));
+
+    public static string DefaultMarkerLabel => Get(nameof(DefaultMarkerLabel));
+
+    public static string ChoiceNone => Get(nameof(ChoiceNone));
+
+    public static string ChoiceConnectorKindPull => Get(nameof(ChoiceConnectorKindPull));
+
+    public static string ChoiceConnectorKindMerge => Get(nameof(ChoiceConnectorKindMerge));
+
+    public static string ChoiceProgressStatePlanned => Get(nameof(ChoiceProgressStatePlanned));
+
+    public static string ChoiceProgressStateDone => Get(nameof(ChoiceProgressStateDone));
+
+    public static string ChoiceMarkerKindReleaseBuild => Get(nameof(ChoiceMarkerKindReleaseBuild));
+
+    public static string ChoiceMarkerKindIntegrationTest => Get(nameof(ChoiceMarkerKindIntegrationTest));
+
+    public static string ChoiceMarkerKindTesting => Get(nameof(ChoiceMarkerKindTesting));
+
+    public static string ChoiceMarkerKindCustom => Get(nameof(ChoiceMarkerKindCustom));
+
+    public static string ChoiceMarkerDirectionFromTop => Get(nameof(ChoiceMarkerDirectionFromTop));
+
+    public static string ChoiceMarkerDirectionFromBottom => Get(nameof(ChoiceMarkerDirectionFromBottom));
+
+    public static string ChoiceMarkerDirectionFromLeft => Get(nameof(ChoiceMarkerDirectionFromLeft));
+
+    public static string ChoiceMarkerDirectionFromRight => Get(nameof(ChoiceMarkerDirectionFromRight));
+
+    public static string ChoiceMarkerAnchorBranch => Get(nameof(ChoiceMarkerAnchorBranch));
+
+    public static string ChoiceMarkerAnchorConnector => Get(nameof(ChoiceMarkerAnchorConnector));
+
+    public static string ChoiceConnectorFormat => Get(nameof(ChoiceConnectorFormat));
+
     public static string Get(string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);

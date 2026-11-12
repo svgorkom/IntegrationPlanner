@@ -1,0 +1,139 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:loc="clr-namespace:IntegrationPlanner.UI.Localization"
+                    xmlns:props="clr-namespace:IntegrationPlanner.UI.ViewModels.Properties">
+    <!-- One page per selection kind; every field commits one undoable change when it loses focus or Enter is pressed. -->
+
+    <DataTemplate DataType="{x:Type props:PlanPropertiesViewModel}">
+        <StackPanel>
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc PropertiesPlan}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldTitle}" />
+            <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Title, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldTitle}" />
+            <StackPanel Visibility="{Binding HasScenario, Mode=OneTime, Converter={StaticResource TrueToVisibleConverter}}">
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc PropertiesScenario}" />
+                <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldName}" />
+                <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding ScenarioName, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldName}" />
+                <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldStepCount}" />
+                <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding StepCount, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldStepCount}" />
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type props:BranchPropertiesViewModel}">
+        <StackPanel>
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc PropertiesBranch}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldName}" />
+            <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Name, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldName}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldSummary}" />
+            <TextBox Style="{StaticResource PropertyMultilineTextBoxStyle}" Text="{Binding Summary, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldSummary}" />
+            <CheckBox Style="{StaticResource PropertyCheckBoxStyle}" IsChecked="{Binding IsMainline, Mode=TwoWay}" Content="{loc:Loc FieldIsMainline}" />
+            <CheckBox Style="{StaticResource PropertyCheckBoxStyle}" IsChecked="{Binding IsCancelled, Mode=TwoWay}" Content="{loc:Loc FieldIsCancelled}" />
+            <StackPanel Visibility="{Binding HasScenario, Mode=OneTime, Converter={StaticResource TrueToVisibleConverter}}">
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc PropertiesLane}" />
+                <CheckBox Style="{StaticResource PropertyCheckBoxStyle}" IsChecked="{Binding IsInScenario, Mode=TwoWay}" Content="{loc:Loc FieldIsInScenario}" />
+                <StackPanel IsEnabled="{Binding IsInScenario, Mode=OneWay}">
+                    <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldOrder}" />
+                    <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Order, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldOrder}" />
+                    <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldStartStep}" />
+                    <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding StartStep, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldStartStep}" />
+                    <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldEndStep}" />
+                    <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding EndStep, Mode=TwoWay, TargetNullValue=''}" AutomationProperties.Name="{loc:Loc FieldEndStep}" />
+                    <CheckBox Style="{StaticResource PropertyCheckBoxStyle}" IsChecked="{Binding ShowFork, Mode=TwoWay}" Content="{loc:Loc FieldShowFork}" />
+                    <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldForkFrom}" />
+                    <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                              ItemsSource="{Binding ForkSources, Mode=OneWay}"
+                              SelectedValuePath="Id"
+                              SelectedValue="{Binding ForkFromId, Mode=TwoWay}"
+                              AutomationProperties.Name="{loc:Loc FieldForkFrom}" />
+                    <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldForkStep}" />
+                    <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding ForkStep, Mode=TwoWay, TargetNullValue=''}" AutomationProperties.Name="{loc:Loc FieldForkStep}" />
+                    <TextBlock Style="{StaticResource HintTextStyle}" Text="{loc:Loc PropertiesLaneHint}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type props:ConnectorPropertiesViewModel}">
+        <StackPanel>
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc PropertiesConnector}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldKind}" />
+            <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                      ItemsSource="{Binding Kinds, Mode=OneTime}"
+                      SelectedValuePath="Value"
+                      SelectedValue="{Binding Kind, Mode=TwoWay}"
+                      AutomationProperties.Name="{loc:Loc FieldKind}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldFrom}" />
+            <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                      ItemsSource="{Binding Branches, Mode=OneWay}"
+                      SelectedValuePath="Id"
+                      SelectedValue="{Binding FromId, Mode=TwoWay}"
+                      AutomationProperties.Name="{loc:Loc FieldFrom}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldTo}" />
+            <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                      ItemsSource="{Binding Branches, Mode=OneWay}"
+                      SelectedValuePath="Id"
+                      SelectedValue="{Binding ToId, Mode=TwoWay}"
+                      AutomationProperties.Name="{loc:Loc FieldTo}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldStep}" />
+            <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Step, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldStep}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldLabel}" />
+            <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Label, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldLabel}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldState}" />
+            <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                      ItemsSource="{Binding States, Mode=OneTime}"
+                      SelectedValuePath="Value"
+                      SelectedValue="{Binding State, Mode=TwoWay}"
+                      AutomationProperties.Name="{loc:Loc FieldState}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type props:MarkerPropertiesViewModel}">
+        <StackPanel>
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc PropertiesMarker}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldKind}" />
+            <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                      ItemsSource="{Binding Kinds, Mode=OneTime}"
+                      SelectedValuePath="Value"
+                      SelectedValue="{Binding Kind, Mode=TwoWay}"
+                      AutomationProperties.Name="{loc:Loc FieldKind}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldLabel}" />
+            <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Label, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldLabel}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldDirection}" />
+            <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                      ItemsSource="{Binding Directions, Mode=OneTime}"
+                      SelectedValuePath="Value"
+                      SelectedValue="{Binding Direction, Mode=TwoWay}"
+                      AutomationProperties.Name="{loc:Loc FieldDirection}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldState}" />
+            <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                      ItemsSource="{Binding States, Mode=OneTime}"
+                      SelectedValuePath="Value"
+                      SelectedValue="{Binding State, Mode=TwoWay}"
+                      AutomationProperties.Name="{loc:Loc FieldState}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldAnchor}" />
+            <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                      ItemsSource="{Binding AnchorKinds, Mode=OneTime}"
+                      SelectedValuePath="Value"
+                      SelectedValue="{Binding AnchorKind, Mode=TwoWay}"
+                      AutomationProperties.Name="{loc:Loc FieldAnchor}" />
+            <StackPanel Visibility="{Binding IsBranchAnchor, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}">
+                <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldAnchorBranch}" />
+                <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                          ItemsSource="{Binding Branches, Mode=OneWay}"
+                          SelectedValuePath="Id"
+                          SelectedValue="{Binding AnchorBranchId, Mode=TwoWay}"
+                          AutomationProperties.Name="{loc:Loc FieldAnchorBranch}" />
+                <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldStep}" />
+                <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding AnchorStep, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldStep}" />
+            </StackPanel>
+            <StackPanel Visibility="{Binding IsConnectorAnchor, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}">
+                <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldAnchorConnector}" />
+                <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
+                          ItemsSource="{Binding Connectors, Mode=OneWay}"
+                          SelectedValuePath="Id"
+                          SelectedValue="{Binding AnchorConnectorId, Mode=TwoWay}"
+                          AutomationProperties.Name="{loc:Loc FieldAnchorConnector}" />
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

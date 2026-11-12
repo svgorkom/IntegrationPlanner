@@ -17,6 +17,19 @@ public sealed class FileDialogService : IFileDialogService
         return dialog.ShowDialog() == true ? dialog.FileName : null;
     }
 
+    public string? PickPlanSaveTarget(string suggestedFileName)
+    {
+        ArgumentNullException.ThrowIfNull(suggestedFileName);
+        SaveFileDialog dialog = new()
+        {
+            Title = UiText.DialogSavePlanTitle,
+            Filter = UiText.DialogPlanFilter,
+            FileName = suggestedFileName,
+            OverwritePrompt = true,
+        };
+        return dialog.ShowDialog() == true ? dialog.FileName : null;
+    }
+
     public string? PickExportTarget(ExportFormat format, string suggestedFileName)
     {
         ArgumentNullException.ThrowIfNull(suggestedFileName);
