@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rendering="clr-namespace:IntegrationPlanner.UI.Rendering">
+    <!-- Dark variant. Brushes are translucent so that the Mica backdrop shows through the panels. -->
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#202020" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E8EEF1" />
+    <SolidColorBrush x:Key="HintBrush" Color="#9AA7AE" />
+    <SolidColorBrush x:Key="GlassPanelBrush" Color="#26FFFFFF" />
+    <SolidColorBrush x:Key="GlassStrokeBrush" Color="#33FFFFFF" />
+    <SolidColorBrush x:Key="GlassHighlightBrush" Color="#1AFFFFFF" />
+    <SolidColorBrush x:Key="CanvasSurroundBrush" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="ChromeHoverBrush" Color="#1AFFFFFF" />
+    <SolidColorBrush x:Key="ChromePressedBrush" Color="#29FFFFFF" />
+    <SolidColorBrush x:Key="SelectionHighlightBrush" Color="#80F0A030" />
+    <SolidColorBrush x:Key="ConnectPreviewBrush" Color="#CC60CDFF" />
+
+    <rendering:ScenePalette x:Key="ActiveScenePalette"
+                            LineColor="#9CC9E0"
+                            TextColor="#D6E6EE"
+                            CancelledColor="#FF6B6B"
+                            MarkerFillColor="#5AA9D0"
+                            MarkerTextColor="#0E1A20"
+                            BackgroundColor="#1F262B"
+                            FontFamily="Calibri"
+                            LineThickness="1.25"
+                            MarkerOutlineThickness="1.5"
+                            DashLength="6"
+                            DashGap="4" />
+</ResourceDictionary>

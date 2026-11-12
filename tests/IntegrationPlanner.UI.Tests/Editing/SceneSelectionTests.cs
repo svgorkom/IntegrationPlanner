@@ -8,6 +8,14 @@ namespace IntegrationPlanner.UI.Tests.Editing;
 public sealed class SceneSelectionTests
 {
     [Fact]
+    public void RenameKeyOf_BranchEditsItsLabel()
+    {
+        string? key = SceneSelection.RenameKeyOf(new BranchSelection(TestPlans.Feature));
+
+        Assert.Equal(SceneKeys.BranchLabel(TestPlans.Feature), key);
+    }
+
+    [Fact]
     public void FromKey_ForkSelectsItsBranch()
     {
         EditorSelection? selection = SceneSelection.FromKey(SceneKeys.Fork(TestPlans.Feature));

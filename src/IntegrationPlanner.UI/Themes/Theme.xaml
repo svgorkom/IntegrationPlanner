@@ -2,22 +2,24 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rendering="clr-namespace:IntegrationPlanner.UI.Rendering"
                     xmlns:converters="clr-namespace:IntegrationPlanner.UI.Converters">
+    <!-- Brushes and the on-screen diagram palette come from Colors.Light.xaml / Colors.Dark.xaml (swapped by ThemeService). -->
     <Color x:Key="PrimaryColor">#1F5670</Color>
     <Color x:Key="CancelledColor">#C00000</Color>
     <Color x:Key="BackgroundColor">#FFFFFF</Color>
-    <Color x:Key="CanvasSurroundColor">#F2F4F5</Color>
     <Color x:Key="MarkerTextColor">#FFFFFF</Color>
     <FontFamily x:Key="DiagramFontFamily">Calibri</FontFamily>
+    <FontFamily x:Key="IconFontFamily">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+    <FontFamily x:Key="UiFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <CornerRadius x:Key="PanelCornerRadius">10</CornerRadius>
 
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
-    <SolidColorBrush x:Key="CancelledBrush" Color="{StaticResource CancelledColor}" />
-    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
-    <SolidColorBrush x:Key="CanvasSurroundBrush" Color="{StaticResource CanvasSurroundColor}" />
-    <SolidColorBrush x:Key="SelectionHighlightBrush" Color="#66F0A030" />
-    <SolidColorBrush x:Key="PanelBorderBrush" Color="#D0D7DB" />
-    <SolidColorBrush x:Key="HintBrush" Color="#5F6B72" />
+    <Style TargetType="ContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+    </Style>
+    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+    </Style>
 
-    <!-- Diagram look shared by screen rendering, PNG/clipboard export and SVG export. -->
+    <!-- Light diagram look used by PNG/clipboard/SVG export so that exported files stay print friendly in either theme. -->
     <rendering:ScenePalette x:Key="ScenePalette"
                             LineColor="{StaticResource PrimaryColor}"
                             TextColor="{StaticResource PrimaryColor}"
@@ -37,60 +39,188 @@
     <Style x:Key="MainWindowStyle" TargetType="Window">
         <Setter Property="Width" Value="1280" />
         <Setter Property="Height" Value="800" />
-        <Setter Property="MinWidth" Value="640" />
-        <Setter Property="MinHeight" Value="400" />
-        <Setter Property="Background" Value="{StaticResource BackgroundBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="MinWidth" Value="720" />
+        <Setter Property="MinHeight" Value="420" />
+        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+        <Setter Property="WindowChrome.WindowChrome">
+            <Setter.Value>
+                <WindowChrome CaptionHeight="46"
+                              ResizeBorderThickness="6"
+                              GlassFrameThickness="-1"
+                              CornerRadius="0"
+                              UseAeroCaptionButtons="False" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Window">
+                    <Border x:Name="Root" Background="{TemplateBinding Background}">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="WindowState" Value="Maximized">
+                            <Setter TargetName="Root" Property="Margin" Value="{x:Static SystemParameters.WindowResizeBorderThickness}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="MainToolBarTrayStyle" TargetType="ToolBarTray">
-        <Setter Property="IsLocked" Value="True" />
+    <Style x:Key="GlassPanelStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource GlassPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource GlassStrokeBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource PanelCornerRadius}" />
+        <Setter Property="Padding" Value="12" />
     </Style>
 
-    <Style x:Key="MainToolBarStyle" TargetType="ToolBar">
-        <Setter Property="ToolBarTray.IsLocked" Value="True" />
-        <Setter Property="Padding" Value="4,2" />
+    <Style x:Key="ExplorerPanelStyle" TargetType="Border" BasedOn="{StaticResource GlassPanelStyle}">
+        <Setter Property="Width" Value="240" />
+        <Setter Property="Margin" Value="10,0,5,10" />
     </Style>
 
-    <Style x:Key="ToolBarLabelStyle" TargetType="TextBlock">
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Margin" Value="4,0" />
-    </Style>
-
-    <Style x:Key="SidePanelStyle" TargetType="Border">
-        <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
-        <Setter Property="Padding" Value="8" />
-    </Style>
-
-    <Style x:Key="ExplorerPanelStyle" TargetType="Border" BasedOn="{StaticResource SidePanelStyle}">
-        <Setter Property="Width" Value="220" />
-        <Setter Property="BorderThickness" Value="0,0,1,0" />
-    </Style>
-
-    <Style x:Key="PropertyPanelStyle" TargetType="Border" BasedOn="{StaticResource SidePanelStyle}">
+    <Style x:Key="PropertyPanelStyle" TargetType="Border" BasedOn="{StaticResource GlassPanelStyle}">
         <Setter Property="Width" Value="300" />
-        <Setter Property="BorderThickness" Value="1,0,0,0" />
+        <Setter Property="Margin" Value="5,0,10,10" />
+    </Style>
+
+    <Style x:Key="CanvasPanelStyle" TargetType="Border" BasedOn="{StaticResource GlassPanelStyle}">
+        <Setter Property="Background" Value="{DynamicResource CanvasSurroundBrush}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="5,0,5,10" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style x:Key="ChromeButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Margin" Value="1,0" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontFamily" Value="{StaticResource IconFontFamily}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Surface" Background="{TemplateBinding Background}" CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Surface" Property="Background" Value="{DynamicResource ChromeHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Surface" Property="Background" Value="{DynamicResource ChromePressedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="CaptionButtonStyle" TargetType="Button" BasedOn="{StaticResource ChromeButtonStyle}">
+        <Setter Property="Width" Value="46" />
+        <Setter Property="Height" Value="46" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Surface" Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Surface" Property="Background" Value="{DynamicResource ChromeHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Surface" Property="Background" Value="{DynamicResource ChromePressedBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="CaptionCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource CaptionButtonStyle}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Surface" Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Surface" Property="Background" Value="#C42B1C" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Surface" Property="Background" Value="#B22A1B" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="TitleTextStyle" TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource HintBrush}" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+
+    <Style x:Key="ZoomBarStyle" TargetType="Border" BasedOn="{StaticResource GlassPanelStyle}">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="Margin" Value="0,0,18,18" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+
+    <Style x:Key="ZoomButtonStyle" TargetType="Button" BasedOn="{StaticResource ChromeButtonStyle}">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <Style x:Key="ZoomValueButtonStyle" TargetType="Button" BasedOn="{StaticResource ChromeButtonStyle}">
+        <Setter Property="Width" Value="56" />
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style x:Key="PanelAddButtonStyle" TargetType="Button" BasedOn="{StaticResource ChromeButtonStyle}">
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Margin" Value="0,8,0,4" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
-    <Style x:Key="PanelButtonRowStyle" TargetType="StackPanel">
-        <Setter Property="Orientation" Value="Horizontal" />
-        <Setter Property="Margin" Value="0,0,0,4" />
-    </Style>
-
-    <Style x:Key="PanelButtonStyle" TargetType="Button">
-        <Setter Property="Padding" Value="8,2" />
-        <Setter Property="Margin" Value="0,0,4,0" />
-    </Style>
-
-    <Style x:Key="ExplorerListBoxStyle" TargetType="ListBox">
+    <Style x:Key="ExplorerListBoxStyle" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
         <Setter Property="DisplayMemberPath" Value="Name" />
         <Setter Property="MinHeight" Value="60" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="ListBoxItem">
@@ -102,18 +232,18 @@
 
     <Style x:Key="PropertyLabelStyle" TargetType="TextBlock">
         <Setter Property="Margin" Value="0,6,0,2" />
+        <Setter Property="Foreground" Value="{DynamicResource HintBrush}" />
     </Style>
 
     <Style x:Key="HintTextStyle" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource HintBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource HintBrush}" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="Margin" Value="0,8,0,0" />
     </Style>
 
     <!-- Each committed change is one plan-level undo step, so the text box keeps no undo history of its own. -->
-    <Style x:Key="PropertyTextBoxStyle" TargetType="TextBox">
+    <Style x:Key="PropertyTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
         <Setter Property="IsUndoEnabled" Value="False" />
-        <Setter Property="Padding" Value="2" />
     </Style>
 
     <Style x:Key="PropertyMultilineTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource PropertyTextBoxStyle}">
@@ -123,24 +253,33 @@
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
     </Style>
 
-    <Style x:Key="PropertyComboBoxStyle" TargetType="ComboBox">
+    <Style x:Key="PropertyComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
         <Setter Property="DisplayMemberPath" Value="Text" />
     </Style>
 
-    <Style x:Key="PropertyCheckBoxStyle" TargetType="CheckBox">
+    <Style x:Key="PropertyCheckBoxStyle" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
         <Setter Property="Margin" Value="0,6,0,0" />
+    </Style>
+
+    <Style x:Key="InlineEditorTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="IsUndoEnabled" Value="False" />
+        <Setter Property="MinWidth" Value="120" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="Visibility" Value="Collapsed" />
     </Style>
 
     <Style x:Key="DiagramScrollViewerStyle" TargetType="ScrollViewer">
         <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-        <Setter Property="Background" Value="{StaticResource CanvasSurroundBrush}" />
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="Focusable" Value="False" />
     </Style>
 
     <Style x:Key="SceneCanvasStyle" TargetType="rendering:SceneCanvas">
-        <Setter Property="Palette" Value="{StaticResource ScenePalette}" />
-        <Setter Property="HighlightBrush" Value="{StaticResource SelectionHighlightBrush}" />
+        <Setter Property="Palette" Value="{DynamicResource ActiveScenePalette}" />
+        <Setter Property="HighlightBrush" Value="{DynamicResource SelectionHighlightBrush}" />
+        <Setter Property="ConnectPreviewBrush" Value="{DynamicResource ConnectPreviewBrush}" />
         <Setter Property="Margin" Value="16" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Top" />
@@ -150,7 +289,7 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource HintBrush}" />
         <Setter Property="IsHitTestVisible" Value="False" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="TextAlignment" Value="Center" />

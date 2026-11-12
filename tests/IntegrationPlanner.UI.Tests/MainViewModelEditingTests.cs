@@ -350,6 +350,48 @@ public sealed class MainViewModelEditingTests
         Assert.True(viewModel.DragTargets.ContainsKey(SceneKeys.Connector(TestPlans.Pull)));
     }
 
+    [Fact]
+    public async Task ConnectElements_AddsAnUndoableConnectorAndSelectsIt()
+    {
+        MainViewModel viewModel = await CreateViewModelWithPlanAsync();
+
+        viewModel.ConnectElementsCommand.Execute(new SceneConnect(SceneKeys.Lane(TestPlans.Feature), SceneKeys.Lane(TestPlans.Main), 2 * LayoutOptions.Default.StepWidth, IsPull: false));
+
+        Assert.Equal((true, true), (viewModel.SelectedProperties is ConnectorPropertiesViewModel, viewModel.UndoCommand.CanExecute(null)));
+    }
+
+    [Fact]
+    public async Task ConnectElements_IgnoresAConnectionToTheSameBranch()
+    {
+        MainViewModel viewModel = await CreateViewModelWithPlanAsync();
+
+        viewModel.ConnectElementsCommand.Execute(new SceneConnect(SceneKeys.Lane(TestPlans.Feature), SceneKeys.Fork(TestPlans.Feature), 0, IsPull: true));
+
+        Assert.False(viewModel.HasUnsavedChanges);
+    }
+
+    [Fact]
+    public async Task RenameElement_RenamesAMarker()
+    {
+        MainViewModel viewModel = await CreateViewModelWithPlanAsync();
+        string key = SceneKeys.Marker(TestPlans.Release);
+
+        viewModel.RenameElementCommand.Execute(new SceneRename(key, "R2"));
+
+        Assert.Equal("R2", viewModel.RenameText(key));
+    }
+
+    [Fact]
+    public async Task RenameElement_RenamesABranch()
+    {
+        MainViewModel viewModel = await CreateViewModelWithPlanAsync();
+        string key = SceneKeys.BranchLabel(TestPlans.Feature);
+
+        viewModel.RenameElementCommand.Execute(new SceneRename(key, "release"));
+
+        Assert.Equal("release", viewModel.RenameText(key));
+    }
+
     private MainViewModel CreateViewModel() =>
         new(_store, _layout, _dialogs, _messages, _exporter, LayoutOptions.Default, NullLogger<MainViewModel>.Instance);
 

@@ -124,6 +124,65 @@ public sealed partial class MainViewModel
         }
     }
 
+    // Merge by default, pull when requested; the step follows the horizontal drop position.
+    [RelayCommand]
+    private void ConnectElements(SceneConnect? connect)
+    {
+        if (connect is null || CurrentScenario is not Scenario scenario
+            || SceneSelection.FromKey(connect.FromKey) is not BranchSelection from
+            || SceneSelection.FromKey(connect.ToKey) is not BranchSelection to
+            || from.BranchId == to.BranchId)
+        {
+            return;
+        }
+
+        int step = Math.Clamp((int)Math.Round(connect.X / _layoutOptions.StepWidth), 0, Math.Max(0, scenario.StepCount - 1));
+        ConnectorKind kind = connect.IsPull ? ConnectorKind.Pull : ConnectorKind.Merge;
+        Connector connector = new(ConnectorId.New(), kind, from.BranchId, to.BranchId, step, null, ProgressState.Planned);
+        _editor!.Execute(new AddConnectorCommand(scenario.Id, connector));
+        SetSelection(new ConnectorSelection(connector.Id));
+    }
+
+    public string? RenameText(string key)
+    {
+        if (_editor is null || CurrentScenario is not Scenario scenario)
+        {
+            return null;
+        }
+
+        return SceneSelection.FromKey(key) switch
+        {
+            BranchSelection branch => _editor.Current.Branches.Find(item => item.Id == branch.BranchId)?.Name,
+            ConnectorSelection connector => scenario.Connectors.Find(item => item.Id == connector.ConnectorId)?.Label ?? string.Empty,
+            MarkerSelection marker => scenario.Markers.Find(item => item.Id == marker.MarkerId)?.Label,
+            _ => null,
+        };
+    }
+
+    [RelayCommand]
+    private void RenameElement(SceneRename? rename)
+    {
+        if (rename is null || _editor is null || CurrentScenario is not Scenario scenario)
+        {
+            return;
+        }
+
+        IPlanCommand? command = SceneSelection.FromKey(rename.Key) switch
+        {
+            BranchSelection branch when _editor.Current.Branches.Find(item => item.Id == branch.BranchId) is Branch found
+                => new UpdateBranchCommand(found with { Name = rename.Text }),
+            ConnectorSelection connector when scenario.Connectors.Find(item => item.Id == connector.ConnectorId) is Connector found
+                => new UpdateConnectorCommand(scenario.Id, found with { Label = string.IsNullOrWhiteSpace(rename.Text) ? null : rename.Text }),
+            MarkerSelection marker when scenario.Markers.Find(item => item.Id == marker.MarkerId) is Marker found
+                => new UpdateMarkerCommand(scenario.Id, found with { Label = rename.Text }),
+            _ => null,
+        };
+        if (command is not null)
+        {
+            _editor.Execute(command);
+        }
+    }
+
     private bool CanUndo() => _editor?.CanUndo == true;
 
     private bool CanRedo() => _editor?.CanRedo == true;

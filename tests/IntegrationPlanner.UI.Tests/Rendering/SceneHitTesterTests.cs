@@ -21,6 +21,22 @@ public sealed class SceneHitTesterTests
         [new SceneArrow(ArrowKey, ImmutableArray.Create(new ScenePoint(90, 80), new ScenePoint(110, 80), new ScenePoint(100, 105)), ArrowStyle.Done)]);
 
     [Fact]
+    public void HitLane_FindsTheLaneWithinTheTolerance()
+    {
+        string? key = SceneHitTester.HitLane(Scene, new ScenePoint(250, 120), 25);
+
+        Assert.Equal(LaneKey, key);
+    }
+
+    [Fact]
+    public void HitLane_IgnoresNonLaneElementsAndFarPoints()
+    {
+        string? key = SceneHitTester.HitLane(Scene, new ScenePoint(100, 20), Tolerance);
+
+        Assert.Null(key);
+    }
+
+    [Fact]
     public void HitTest_PointNearALineSelectsTheLine()
     {
         string? key = SceneHitTester.HitTest(Scene, new ScenePoint(250, 104), Tolerance);

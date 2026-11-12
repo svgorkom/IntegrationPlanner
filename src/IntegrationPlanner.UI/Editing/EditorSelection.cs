@@ -30,6 +30,15 @@ public static class SceneSelection
         };
     }
 
+    // The element whose text is edited in place to rename the selection.
+    public static string? RenameKeyOf(EditorSelection? selection) => selection switch
+    {
+        BranchSelection branch => SceneKeys.BranchLabel(branch.BranchId),
+        ConnectorSelection connector => SceneKeys.ConnectorLabel(connector.ConnectorId),
+        MarkerSelection marker => SceneKeys.Marker(marker.MarkerId),
+        _ => null,
+    };
+
     public static IReadOnlyList<string> KeysOf(EditorSelection? selection) => selection switch
     {
         BranchSelection branch => [SceneKeys.Lane(branch.BranchId), SceneKeys.Fork(branch.BranchId), SceneKeys.BranchLabel(branch.BranchId)],

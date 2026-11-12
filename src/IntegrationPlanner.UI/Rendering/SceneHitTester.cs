@@ -37,6 +37,20 @@ public static class SceneHitTester
         return scene.Texts.Any(candidate => candidate.Key == SceneKeys.Title && Contains(candidate, point, tolerance)) ? SceneKeys.Title : null;
     }
 
+    // The lane line nearest to the point, if any lies within the tolerance.
+    public static string? HitLane(DiagramScene scene, ScenePoint point, double tolerance)
+    {
+        ArgumentNullException.ThrowIfNull(scene);
+        ArgumentOutOfRangeException.ThrowIfNegative(tolerance);
+        return scene.Lines
+            .Where(line => SceneKeys.TryParse(line.Key, out SceneElementRef? element) && element.Kind == SceneElementKind.Lane)
+            .Select(line => (line.Key, Distance: DistanceToSegment(point, line.From, line.To)))
+            .Where(candidate => candidate.Distance <= tolerance)
+            .OrderBy(candidate => candidate.Distance)
+            .Select(candidate => candidate.Key)
+            .FirstOrDefault();
+    }
+
     private static bool Contains(SceneText text, ScenePoint point, double tolerance)
     {
         ScenePoint local = SceneGeometry.Rotate(point, text.Center, -text.Angle);

@@ -357,4 +357,13 @@
   <data name="FieldAnchorConnector" xml:space="preserve">
     <value>Pull or merge</value>
   </data>
+  <data name="ContextRename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="ToolbarMoreToolTip" xml:space="preserve">
+    <value>More actions</value>
+  </data>
+  <data name="ToolbarToggleTheme" xml:space="preserve">
+    <value>Switch light/dark theme</value>
+  </data>
 </root>

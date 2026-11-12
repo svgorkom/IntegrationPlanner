@@ -26,31 +26,39 @@
         <KeyBinding Command="{Binding ResetZoomCommand, Mode=OneTime}" Gesture="Ctrl+D0" />
     </Window.InputBindings>
     <DockPanel>
-        <ToolBarTray DockPanel.Dock="Top" Style="{StaticResource MainToolBarTrayStyle}">
-            <ToolBar Style="{StaticResource MainToolBarStyle}">
-                <Button Command="{Binding NewCommand, Mode=OneTime}" Content="{loc:Loc ToolbarNew}" ToolTip="{loc:Loc ToolbarNewToolTip}" />
-                <Button Command="{Binding OpenCommand, Mode=OneTime}" Content="{loc:Loc ToolbarOpen}" ToolTip="{loc:Loc ToolbarOpenToolTip}" />
-                <Button Command="{Binding SaveCommand, Mode=OneTime}" Content="{loc:Loc ToolbarSave}" ToolTip="{loc:Loc ToolbarSaveToolTip}" />
-                <Button Command="{Binding SaveAsCommand, Mode=OneTime}" Content="{loc:Loc ToolbarSaveAs}" ToolTip="{loc:Loc ToolbarSaveAsToolTip}" />
-                <Separator />
-                <Button Command="{Binding AddBranchCommand, Mode=OneTime}" Content="{loc:Loc ToolbarAddBranch}" ToolTip="{loc:Loc ToolbarAddBranchToolTip}" />
-                <Button Command="{Binding AddPullCommand, Mode=OneTime}" Content="{loc:Loc ToolbarAddPull}" ToolTip="{loc:Loc ToolbarAddPullToolTip}" />
-                <Button Command="{Binding AddMergeCommand, Mode=OneTime}" Content="{loc:Loc ToolbarAddMerge}" ToolTip="{loc:Loc ToolbarAddMergeToolTip}" />
-                <Button Command="{Binding AddMarkerCommand, Mode=OneTime}" Content="{loc:Loc ToolbarAddMarker}" ToolTip="{loc:Loc ToolbarAddMarkerToolTip}" />
-                <Button Command="{Binding DeleteSelectionCommand, Mode=OneTime}" Content="{loc:Loc ToolbarDelete}" ToolTip="{loc:Loc ToolbarDeleteToolTip}" />
-                <Separator />
-                <Button Command="{Binding UndoCommand, Mode=OneTime}" Content="{loc:Loc ToolbarUndo}" ToolTip="{loc:Loc ToolbarUndoToolTip}" />
-                <Button Command="{Binding RedoCommand, Mode=OneTime}" Content="{loc:Loc ToolbarRedo}" ToolTip="{loc:Loc ToolbarRedoToolTip}" />
-                <Separator />
-                <Button Command="{Binding ZoomOutCommand, Mode=OneTime}" Content="{loc:Loc ToolbarZoomOut}" ToolTip="{loc:Loc ToolbarZoomOutToolTip}" />
-                <Button Command="{Binding ResetZoomCommand, Mode=OneTime}" Content="{Binding Zoom, Mode=OneWay}" ContentStringFormat="P0" ToolTip="{loc:Loc ToolbarResetZoomToolTip}" />
-                <Button Command="{Binding ZoomInCommand, Mode=OneTime}" Content="{loc:Loc ToolbarZoomIn}" ToolTip="{loc:Loc ToolbarZoomInToolTip}" />
-                <Separator />
-                <Button Command="{Binding ExportPngCommand, Mode=OneTime}" Content="{loc:Loc ToolbarExportPng}" ToolTip="{loc:Loc ToolbarExportPngToolTip}" />
-                <Button Command="{Binding ExportSvgCommand, Mode=OneTime}" Content="{loc:Loc ToolbarExportSvg}" ToolTip="{loc:Loc ToolbarExportSvgToolTip}" />
-                <Button Command="{Binding CopyToClipboardCommand, Mode=OneTime}" Content="{loc:Loc ToolbarCopy}" ToolTip="{loc:Loc ToolbarCopyToolTip}" />
-            </ToolBar>
-        </ToolBarTray>
+        <Grid DockPanel.Dock="Top" Height="46">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
+                <Button Style="{StaticResource ChromeButtonStyle}" Content="&#xE8E5;" Command="{Binding OpenCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarOpenToolTip}" />
+                <Button Style="{StaticResource ChromeButtonStyle}" Content="&#xE74E;" Command="{Binding SaveCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarSaveToolTip}" />
+                <Button Style="{StaticResource ChromeButtonStyle}" Content="&#xE7A7;" Command="{Binding UndoCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarUndoToolTip}" />
+                <Button Style="{StaticResource ChromeButtonStyle}" Content="&#xE7A6;" Command="{Binding RedoCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarRedoToolTip}" />
+                <Button x:Name="MoreButton" Style="{StaticResource ChromeButtonStyle}" Content="&#xE712;" ToolTip="{loc:Loc ToolbarMoreToolTip}" Click="OnMoreClick">
+                    <Button.ContextMenu>
+                        <ContextMenu Placement="Bottom">
+                            <MenuItem Header="{loc:Loc ToolbarNew}" Command="{Binding NewCommand, Mode=OneTime}" />
+                            <MenuItem Header="{loc:Loc ToolbarSaveAs}" Command="{Binding SaveAsCommand, Mode=OneTime}" />
+                            <Separator />
+                            <MenuItem Header="{loc:Loc ToolbarExportPng}" Command="{Binding ExportPngCommand, Mode=OneTime}" />
+                            <MenuItem Header="{loc:Loc ToolbarExportSvg}" Command="{Binding ExportSvgCommand, Mode=OneTime}" />
+                            <MenuItem Header="{loc:Loc ToolbarCopy}" Command="{Binding CopyToClipboardCommand, Mode=OneTime}" />
+                            <Separator />
+                            <MenuItem Header="{loc:Loc ToolbarToggleTheme}" Click="OnToggleTheme" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+            </StackPanel>
+            <TextBlock Grid.Column="1" Style="{StaticResource TitleTextStyle}" Text="{Binding WindowTitle, Mode=OneWay}" />
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Style="{StaticResource CaptionButtonStyle}" Content="&#xE921;" Click="OnMinimizeClick" />
+                <Button x:Name="MaximizeButton" Style="{StaticResource CaptionButtonStyle}" Content="&#xE922;" Click="OnMaximizeClick" />
+                <Button Style="{StaticResource CaptionCloseButtonStyle}" Content="&#xE8BB;" Click="OnCloseClick" />
+            </StackPanel>
+        </Grid>
 
         <Border DockPanel.Dock="Left" Style="{StaticResource ExplorerPanelStyle}" IsEnabled="{Binding HasPlan, Mode=OneWay}">
             <Grid>
@@ -62,26 +70,39 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="2*" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc ExplorerScenarios}" />
-                <StackPanel Grid.Row="1" Style="{StaticResource PanelButtonRowStyle}">
-                    <Button Style="{StaticResource PanelButtonStyle}" Command="{Binding AddScenarioCommand, Mode=OneTime}" Content="{loc:Loc ExplorerAdd}" ToolTip="{loc:Loc ExplorerAddScenarioToolTip}" />
-                    <Button Style="{StaticResource PanelButtonStyle}" Command="{Binding DuplicateScenarioCommand, Mode=OneTime}" Content="{loc:Loc ExplorerDuplicateScenario}" ToolTip="{loc:Loc ExplorerDuplicateScenarioToolTip}" />
-                    <Button Style="{StaticResource PanelButtonStyle}" Command="{Binding DeleteScenarioCommand, Mode=OneTime}" Content="{loc:Loc ExplorerDeleteScenario}" ToolTip="{loc:Loc ExplorerDeleteScenarioToolTip}" />
-                </StackPanel>
+                <Grid Grid.Row="0">
+                    <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc ExplorerScenarios}" />
+                    <Button Style="{StaticResource PanelAddButtonStyle}" HorizontalAlignment="Right" Content="&#xE710;" Command="{Binding AddScenarioCommand, Mode=OneTime}" ToolTip="{loc:Loc ExplorerAddScenarioToolTip}" />
+                </Grid>
                 <ListBox Grid.Row="2"
                          Style="{StaticResource ExplorerListBoxStyle}"
                          ItemsSource="{Binding Scenarios, Mode=OneTime}"
                          SelectedItem="{Binding SelectedScenario, Mode=TwoWay}"
-                         AutomationProperties.Name="{loc:Loc ExplorerScenarios}" />
-                <TextBlock Grid.Row="3" Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc ExplorerBranches}" />
-                <StackPanel Grid.Row="4" Style="{StaticResource PanelButtonRowStyle}">
-                    <Button Style="{StaticResource PanelButtonStyle}" Command="{Binding AddBranchCommand, Mode=OneTime}" Content="{loc:Loc ExplorerAdd}" ToolTip="{loc:Loc ExplorerAddBranchToolTip}" />
-                </StackPanel>
+                         AutomationProperties.Name="{loc:Loc ExplorerScenarios}">
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{loc:Loc ExplorerAdd}" Command="{Binding AddScenarioCommand, Mode=OneTime}" />
+                            <MenuItem Header="{loc:Loc ExplorerDuplicateScenario}" Command="{Binding DuplicateScenarioCommand, Mode=OneTime}" />
+                            <MenuItem Header="{loc:Loc ExplorerDeleteScenario}" Command="{Binding DeleteScenarioCommand, Mode=OneTime}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                </ListBox>
+                <Grid Grid.Row="3">
+                    <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{loc:Loc ExplorerBranches}" />
+                    <Button Style="{StaticResource PanelAddButtonStyle}" HorizontalAlignment="Right" Content="&#xE710;" Command="{Binding AddBranchCommand, Mode=OneTime}" ToolTip="{loc:Loc ExplorerAddBranchToolTip}" />
+                </Grid>
                 <ListBox Grid.Row="5"
                          Style="{StaticResource ExplorerListBoxStyle}"
                          ItemsSource="{Binding Branches, Mode=OneTime}"
                          SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
-                         AutomationProperties.Name="{loc:Loc ExplorerBranches}" />
+                         AutomationProperties.Name="{loc:Loc ExplorerBranches}">
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{loc:Loc ExplorerAdd}" Command="{Binding AddBranchCommand, Mode=OneTime}" />
+                            <MenuItem Header="{loc:Loc ToolbarDelete}" Command="{Binding DeleteSelectionCommand, Mode=OneTime}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                </ListBox>
             </Grid>
         </Border>
 
@@ -94,13 +115,27 @@
             </DockPanel>
         </Border>
 
-        <Grid>
+        <Border Style="{StaticResource CanvasPanelStyle}">
+        <Grid x:Name="CanvasHost">
+            <Grid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="{loc:Loc ContextRename}" Click="OnRenameSelected" />
+                    <MenuItem Header="{loc:Loc ToolbarAddBranch}" Command="{Binding AddBranchCommand, Mode=OneTime}" />
+                    <MenuItem Header="{loc:Loc ToolbarAddMarker}" Command="{Binding AddMarkerCommand, Mode=OneTime}" />
+                    <MenuItem Header="{loc:Loc ToolbarAddPull}" Command="{Binding AddPullCommand, Mode=OneTime}" />
+                    <MenuItem Header="{loc:Loc ToolbarAddMerge}" Command="{Binding AddMergeCommand, Mode=OneTime}" />
+                    <Separator />
+                    <MenuItem Header="{loc:Loc ToolbarDelete}" Command="{Binding DeleteSelectionCommand, Mode=OneTime}" />
+                </ContextMenu>
+            </Grid.ContextMenu>
             <ScrollViewer Style="{StaticResource DiagramScrollViewerStyle}"
                           behaviors:ScrollViewerBehaviors.ZoomInCommand="{Binding ZoomInCommand, Mode=OneTime}"
                           behaviors:ScrollViewerBehaviors.ZoomOutCommand="{Binding ZoomOutCommand, Mode=OneTime}"
                           behaviors:ScrollViewerBehaviors.IsDragPanEnabled="True">
-                <rendering:SceneCanvas Style="{StaticResource SceneCanvasStyle}"
+                <rendering:SceneCanvas x:Name="Diagram" Style="{StaticResource SceneCanvasStyle}"
                                        Scene="{Binding Scene, Mode=OneWay}"
+                                       RenameRequested="OnRenameRequested"
+                                       ConnectCommand="{Binding ConnectElementsCommand, Mode=OneTime}"
                                        SelectCommand="{Binding SelectElementCommand, Mode=OneTime}"
                                        MoveCommand="{Binding MoveElementCommand, Mode=OneTime}"
                                        SelectedKeys="{Binding SelectedKeys, Mode=OneWay}"
@@ -115,6 +150,16 @@
             <TextBlock Style="{StaticResource EmptyStateTextStyle}"
                        Text="{loc:Loc EmptyStateText}"
                        Visibility="{Binding Scene, Mode=OneWay, Converter={StaticResource NullToVisibleConverter}}" />
+            <Border Style="{StaticResource ZoomBarStyle}">
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource ZoomButtonStyle}" Content="{loc:Loc ToolbarZoomOut}" Command="{Binding ZoomOutCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarZoomOutToolTip}" />
+                    <Button Style="{StaticResource ZoomValueButtonStyle}" Content="{Binding Zoom, Mode=OneWay}" ContentStringFormat="P0" Command="{Binding ResetZoomCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarResetZoomToolTip}" />
+                    <Button Style="{StaticResource ZoomButtonStyle}" Content="{loc:Loc ToolbarZoomIn}" Command="{Binding ZoomInCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarZoomInToolTip}" />
+                </StackPanel>
+            </Border>
+            <TextBox x:Name="InlineEditor" Style="{StaticResource InlineEditorTextBoxStyle}" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"
+                     LostKeyboardFocus="OnInlineEditorLostFocus" PreviewKeyDown="OnInlineEditorKeyDown" />
         </Grid>
+        </Border>
     </DockPanel>
 </Window>

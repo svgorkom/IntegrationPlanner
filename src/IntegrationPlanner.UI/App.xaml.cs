@@ -32,6 +32,7 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
+        _services.GetRequiredService<ThemeService>().ApplySystemTheme();
         MainWindow mainWindow = _services.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
         mainWindow.Show();
@@ -68,6 +69,7 @@ public partial class App : Application
         services.AddSingleton<SvgSceneWriter>();
         services.AddSingleton<ISceneExporter, SceneExporter>();
         services.AddSingleton<UnhandledExceptionHandler>();
+        services.AddSingleton<ThemeService>();
         services.AddSingleton<MainViewModel>();
         services.AddTransient<MainWindow>();
         return services;

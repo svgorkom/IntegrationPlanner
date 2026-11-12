@@ -79,34 +79,207 @@
       "name": "Scenario 3: Merge OrderPool reverse^2 to AD-15777",
       "stepCount": 19,
       "lanes": [
-        { "branchId": "ad-16384", "order": -2, "startStep": 0, "endStep": 4, "showFork": false },
-        { "branchId": "ad-16394", "order": -1, "startStep": 0, "endStep": 3, "showFork": false },
-        { "branchId": "develop", "order": 0, "startStep": 0, "showFork": false },
-        { "branchId": "ad-xxxxxx", "order": 1, "startStep": 8, "endStep": 15, "showFork": true, "forkFromBranchId": "develop", "forkStep": 8 },
-        { "branchId": "ad-16221", "order": 2, "startStep": 9, "endStep": 11, "showFork": true, "forkFromBranchId": "ad-xxxxxx", "forkStep": 9 },
-        { "branchId": "ad-16218", "order": 2, "startStep": 12, "endStep": 13, "showFork": true, "forkFromBranchId": "ad-xxxxxx", "forkStep": 12 },
-        { "branchId": "ad-15777", "order": 3, "startStep": 0, "endStep": 17, "showFork": false },
-        { "branchId": "ad-16190", "order": 4, "startStep": 0, "endStep": 2, "showFork": false },
-        { "branchId": "ad-16250", "order": 4, "startStep": 3, "endStep": 6, "showFork": false },
-        { "branchId": "ad-16253", "order": 4, "startStep": 7, "endStep": 10, "showFork": false }
+        {
+          "branchId": "ad-16384",
+          "order": -2,
+          "startStep": 0,
+          "endStep": 4,
+          "showFork": false
+        },
+        {
+          "branchId": "ad-16394",
+          "order": -1,
+          "startStep": 0,
+          "endStep": 3,
+          "showFork": false
+        },
+        {
+          "branchId": "develop",
+          "order": 0,
+          "startStep": 0,
+          "showFork": false
+        },
+        {
+          "branchId": "ad-xxxxxx",
+          "order": 1,
+          "startStep": 8,
+          "endStep": 15,
+          "showFork": true,
+          "forkFromBranchId": "develop",
+          "forkStep": 8
+        },
+        {
+          "branchId": "ad-16221",
+          "order": 2,
+          "startStep": 9,
+          "endStep": 11,
+          "showFork": true,
+          "forkFromBranchId": "ad-xxxxxx",
+          "forkStep": 9
+        },
+        {
+          "branchId": "ad-16218",
+          "order": 2,
+          "startStep": 12,
+          "endStep": 13,
+          "showFork": true,
+          "forkFromBranchId": "ad-xxxxxx",
+          "forkStep": 12
+        },
+        {
+          "branchId": "ad-15777",
+          "order": 3,
+          "startStep": 0,
+          "endStep": 17,
+          "showFork": false
+        },
+        {
+          "branchId": "ad-16190",
+          "order": 4,
+          "startStep": 0,
+          "endStep": 2,
+          "showFork": false
+        },
+        {
+          "branchId": "ad-16250",
+          "order": 4,
+          "startStep": 3,
+          "endStep": 6,
+          "showFork": false
+        },
+        {
+          "branchId": "ad-16253",
+          "order": 4,
+          "startStep": 7,
+          "endStep": 10,
+          "showFork": false
+        }
       ],
       "connectors": [
-        { "id": "merge-16190-into-15777", "kind": "merge", "fromBranchId": "ad-16190", "toBranchId": "ad-15777", "step": 2, "state": "done" },
-        { "id": "merge-16394-into-develop", "kind": "merge", "fromBranchId": "ad-16394", "toBranchId": "develop", "step": 3, "state": "done" },
-        { "id": "merge-16384-into-develop", "kind": "merge", "fromBranchId": "ad-16384", "toBranchId": "develop", "step": 4, "state": "done" },
-        { "id": "pull-develop-into-15777-before-split", "kind": "pull", "fromBranchId": "develop", "toBranchId": "ad-15777", "step": 5, "label": "Pull develop before OrderPool split reverse", "state": "done" },
-        { "id": "merge-16250-into-15777", "kind": "merge", "fromBranchId": "ad-16250", "toBranchId": "ad-15777", "step": 6, "state": "done" },
-        { "id": "merge-16253-into-15777", "kind": "merge", "fromBranchId": "ad-16253", "toBranchId": "ad-15777", "step": 10, "state": "done" },
-        { "id": "merge-16221-into-xxxxxx", "kind": "merge", "fromBranchId": "ad-16221", "toBranchId": "ad-xxxxxx", "step": 11, "state": "done" },
-        { "id": "merge-16218-into-xxxxxx", "kind": "merge", "fromBranchId": "ad-16218", "toBranchId": "ad-xxxxxx", "step": 13, "state": "done" },
-        { "id": "pull-develop-into-xxxxxx", "kind": "pull", "fromBranchId": "develop", "toBranchId": "ad-xxxxxx", "step": 14, "label": "Pull develop", "state": "done" },
-        { "id": "merge-xxxxxx-into-15777", "kind": "merge", "fromBranchId": "ad-xxxxxx", "toBranchId": "ad-15777", "step": 15, "label": "Merge reverse reverse orderpool to AD-15777", "state": "done" },
-        { "id": "pull-develop-into-15777", "kind": "pull", "fromBranchId": "develop", "toBranchId": "ad-15777", "step": 16, "label": "Pull develop", "state": "done" },
-        { "id": "merge-15777-into-develop", "kind": "merge", "fromBranchId": "ad-15777", "toBranchId": "develop", "step": 17, "label": "Merge to develop", "state": "done" }
+        {
+          "id": "merge-16190-into-15777",
+          "kind": "merge",
+          "fromBranchId": "ad-16190",
+          "toBranchId": "ad-15777",
+          "step": 2,
+          "state": "done"
+        },
+        {
+          "id": "merge-16394-into-develop",
+          "kind": "merge",
+          "fromBranchId": "ad-16394",
+          "toBranchId": "develop",
+          "step": 3,
+          "state": "done"
+        },
+        {
+          "id": "merge-16384-into-develop",
+          "kind": "merge",
+          "fromBranchId": "ad-16384",
+          "toBranchId": "develop",
+          "step": 4,
+          "state": "done"
+        },
+        {
+          "id": "pull-develop-into-15777-before-split",
+          "kind": "pull",
+          "fromBranchId": "develop",
+          "toBranchId": "ad-15777",
+          "step": 5,
+          "label": "Pull develop before OrderPool split reverse",
+          "state": "done"
+        },
+        {
+          "id": "merge-16250-into-15777",
+          "kind": "merge",
+          "fromBranchId": "ad-16250",
+          "toBranchId": "ad-15777",
+          "step": 6,
+          "state": "done"
+        },
+        {
+          "id": "merge-16253-into-15777",
+          "kind": "merge",
+          "fromBranchId": "ad-16253",
+          "toBranchId": "ad-15777",
+          "step": 10,
+          "state": "done"
+        },
+        {
+          "id": "merge-16221-into-xxxxxx",
+          "kind": "merge",
+          "fromBranchId": "ad-16221",
+          "toBranchId": "ad-xxxxxx",
+          "step": 11,
+          "state": "done"
+        },
+        {
+          "id": "merge-16218-into-xxxxxx",
+          "kind": "merge",
+          "fromBranchId": "ad-16218",
+          "toBranchId": "ad-xxxxxx",
+          "step": 13,
+          "state": "done"
+        },
+        {
+          "id": "pull-develop-into-xxxxxx",
+          "kind": "pull",
+          "fromBranchId": "develop",
+          "toBranchId": "ad-xxxxxx",
+          "step": 14,
+          "label": "Pull develop",
+          "state": "done"
+        },
+        {
+          "id": "merge-xxxxxx-into-15777",
+          "kind": "merge",
+          "fromBranchId": "ad-xxxxxx",
+          "toBranchId": "ad-15777",
+          "step": 15,
+          "label": "Merge reverse reverse orderpool to AD-15777",
+          "state": "done"
+        },
+        {
+          "id": "pull-develop-into-15777",
+          "kind": "pull",
+          "fromBranchId": "develop",
+          "toBranchId": "ad-15777",
+          "step": 16,
+          "label": "Pull develop",
+          "state": "done"
+        },
+        {
+          "id": "merge-15777-into-develop",
+          "kind": "merge",
+          "fromBranchId": "ad-15777",
+          "toBranchId": "develop",
+          "step": 17,
+          "label": "Merge to develop",
+          "state": "done"
+        }
       ],
       "markers": [
-        { "id": "release-build", "kind": "releaseBuild", "label": "Release build", "anchor": { "branchId": "develop", "step": 7 }, "direction": "fromTop", "state": "done" },
-        { "id": "lots-of-testing", "kind": "testing", "label": "Lots of testing!", "anchor": { "connectorId": "merge-15777-into-develop" }, "direction": "fromRight", "state": "done" }
+        {
+          "id": "release-build",
+          "kind": "releaseBuild",
+          "label": "Release build",
+          "anchor": {
+            "branchId": "develop",
+            "step": 7
+          },
+          "direction": "fromTop",
+          "state": "done"
+        },
+        {
+          "id": "lots-of-testing",
+          "kind": "testing",
+          "label": "Lots of testing!",
+          "anchor": {
+            "connectorId": "merge-15777-into-develop"
+          },
+          "direction": "fromRight",
+          "state": "done"
+        }
       ]
     }
   ]

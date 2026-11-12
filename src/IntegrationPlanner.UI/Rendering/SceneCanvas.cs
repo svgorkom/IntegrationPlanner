@@ -44,14 +44,25 @@ public sealed class SceneCanvas : FrameworkElement
     public static readonly DependencyProperty HighlightBrushProperty = DependencyProperty.Register(
         nameof(HighlightBrush), typeof(Brush), typeof(SceneCanvas), new PropertyMetadata(null, OnOverlayInputChanged));
 
+    public static readonly DependencyProperty ConnectCommandProperty = DependencyProperty.Register(
+        nameof(ConnectCommand), typeof(ICommand), typeof(SceneCanvas), new PropertyMetadata(null));
+
+    public static readonly DependencyProperty ConnectPreviewBrushProperty = DependencyProperty.Register(
+        nameof(ConnectPreviewBrush), typeof(Brush), typeof(SceneCanvas), new PropertyMetadata(null, OnOverlayInputChanged));
+
     private const double HitTolerance = 5;
     private const double HighlightThickness = 6;
     private const double DragThreshold = 3;
+    private const double ConnectPreviewThickness = 2;
+    private const double RenameFallbackWidth = 120;
+    private const double RenameFallbackHeight = 22;
 
     private readonly DrawingVisual _visual = new();
     private readonly DrawingVisual _overlay = new();
     private string? _dragKey;
+    private string? _connectKey;
     private Point _dragStart;
+    private Point _connectCurrent;
     private Vector _dragOffset;
 
     public SceneCanvas()
@@ -114,6 +125,20 @@ public sealed class SceneCanvas : FrameworkElement
         set => SetValue(HighlightBrushProperty, value);
     }
 
+    public ICommand? ConnectCommand
+    {
+        get => (ICommand?)GetValue(ConnectCommandProperty);
+        set => SetValue(ConnectCommandProperty, value);
+    }
+
+    public Brush? ConnectPreviewBrush
+    {
+        get => (Brush?)GetValue(ConnectPreviewBrushProperty);
+        set => SetValue(ConnectPreviewBrushProperty, value);
+    }
+
+    public event EventHandler<SceneRenameRequestedEventArgs>? RenameRequested;
+
     protected override int VisualChildrenCount => 2;
 
     protected override Visual GetVisualChild(int index) => index switch
@@ -149,7 +174,7 @@ public sealed class SceneCanvas : FrameworkElement
         }
 
         Point position = e.GetPosition(this);
-        string? key = SceneHitTester.HitTest(Scene, new ScenePoint(position.X + Scene.Bounds.Left, position.Y + Scene.Bounds.Top), HitTolerance);
+        string? key = SceneHitTester.HitTest(Scene, ToScene(position), HitTolerance);
         Execute(SelectCommand, key);
         if (key is null || key == SceneKeys.Title)
         {
@@ -157,6 +182,25 @@ public sealed class SceneCanvas : FrameworkElement
         }
 
         e.Handled = true;
+        if (e.ClickCount == 2)
+        {
+            RequestRename(SceneSelection.RenameKeyOf(SceneSelection.FromKey(key)));
+            return;
+        }
+
+        // Pressing on a lane line itself starts a connection; the branch label and the fork keep reordering lanes.
+        if (IsLane(key) && ConnectCommand is not null)
+        {
+            if (CaptureMouse())
+            {
+                _connectKey = key;
+                _dragStart = position;
+                _connectCurrent = position;
+            }
+
+            return;
+        }
+
         if (DragTargets?.ContainsKey(key) == true && CaptureMouse())
         {
             _dragKey = key;
@@ -165,10 +209,27 @@ public sealed class SceneCanvas : FrameworkElement
         }
     }
 
+    protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+        base.OnMouseRightButtonDown(e);
+        if (Scene is not null)
+        {
+            Execute(SelectCommand, SceneHitTester.HitTest(Scene, ToScene(e.GetPosition(this)), HitTolerance));
+        }
+    }
+
     protected override void OnMouseMove(MouseEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);
         base.OnMouseMove(e);
+        if (_connectKey is not null)
+        {
+            _connectCurrent = e.GetPosition(this);
+            RedrawOverlay();
+            return;
+        }
+
         if (_dragKey is null || DragTargets is not { } targets || !targets.TryGetValue(_dragKey, out SceneDragTarget? target))
         {
             return;
@@ -189,6 +250,12 @@ public sealed class SceneCanvas : FrameworkElement
     {
         ArgumentNullException.ThrowIfNull(e);
         base.OnMouseLeftButtonUp(e);
+        if (_connectKey is not null)
+        {
+            CompleteConnect(e);
+            return;
+        }
+
         if (_dragKey is null)
         {
             return;
@@ -211,9 +278,42 @@ public sealed class SceneCanvas : FrameworkElement
     {
         base.OnLostMouseCapture(e);
         _dragKey = null;
+        _connectKey = null;
         _dragOffset = default;
         RedrawOverlay();
     }
+
+    public void RequestRename(string? key)
+    {
+        if (key is null || Scene is null || RenameBounds(Scene, key) is not SceneRect bounds)
+        {
+            return;
+        }
+
+        RenameRequested?.Invoke(this, new SceneRenameRequestedEventArgs(key, new Rect(bounds.Left - Scene.Bounds.Left, bounds.Top - Scene.Bounds.Top, bounds.Width, bounds.Height)));
+    }
+
+    private static SceneRect? RenameBounds(DiagramScene scene, string key)
+    {
+        SceneText? text = scene.Texts.FirstOrDefault(candidate => candidate.Key == key);
+        if (text is not null)
+        {
+            return text.Bounds;
+        }
+
+        SceneArrow? arrow = scene.Arrows.FirstOrDefault(candidate => candidate.Key == key);
+        if (arrow is not null)
+        {
+            return arrow.Bounds;
+        }
+
+        SceneLine? line = scene.Lines.FirstOrDefault(candidate => candidate.Key == key.Replace("-label", string.Empty, StringComparison.Ordinal));
+        return line is null
+            ? null
+            : new SceneRect(((line.From.X + line.To.X) / 2) - (RenameFallbackWidth / 2), ((line.From.Y + line.To.Y) / 2) - (RenameFallbackHeight / 2), RenameFallbackWidth, RenameFallbackHeight);
+    }
+
+    private static bool IsLane(string key) => SceneKeys.TryParse(key, out SceneElementRef? element) && element.Kind == SceneElementKind.Lane;
 
     private static void OnVisualInputChanged(DependencyObject owner, DependencyPropertyChangedEventArgs e) =>
         ((SceneCanvas)owner).Redraw();
@@ -226,6 +326,28 @@ public sealed class SceneCanvas : FrameworkElement
         if (command?.CanExecute(parameter) == true)
         {
             command.Execute(parameter);
+        }
+    }
+
+    private ScenePoint ToScene(Point position) => new(position.X + Scene!.Bounds.Left, position.Y + Scene.Bounds.Top);
+
+    private string? TargetLaneAt(Point position)
+    {
+        string? key = SceneHitTester.HitLane(Scene!, ToScene(position), VerticalSnap / 2);
+        return key is null || key == _connectKey ? null : key;
+    }
+
+    private void CompleteConnect(MouseButtonEventArgs e)
+    {
+        string fromKey = _connectKey!;
+        Point position = e.GetPosition(this);
+        double distance = (position - _dragStart).Length;
+        string? toKey = Scene is null ? null : TargetLaneAt(position);
+        ReleaseMouseCapture();
+        e.Handled = true;
+        if (toKey is not null && distance >= DragThreshold)
+        {
+            Execute(ConnectCommand, new SceneConnect(fromKey, toKey, ToScene(position).X, Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)));
         }
     }
 
@@ -258,6 +380,26 @@ public sealed class SceneCanvas : FrameworkElement
         {
             DrawHighlight(context, pen, target.Keys, _dragOffset);
         }
+
+        DrawConnectPreview(context);
+    }
+
+    private void DrawConnectPreview(DrawingContext context)
+    {
+        if (_connectKey is null || ConnectPreviewBrush is null || (_connectCurrent - _dragStart).Length < DragThreshold)
+        {
+            return;
+        }
+
+        string? targetKey = TargetLaneAt(_connectCurrent);
+        if (targetKey is not null)
+        {
+            DrawHighlight(context, new Pen(ConnectPreviewBrush, HighlightThickness) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round }, [targetKey], default);
+        }
+
+        Pen preview = new(ConnectPreviewBrush, ConnectPreviewThickness) { DashStyle = DashStyles.Dash, EndLineCap = PenLineCap.Round };
+        Point origin = new(Scene!.Bounds.Left, Scene.Bounds.Top);
+        context.DrawLine(preview, _dragStart + (Vector)origin, _connectCurrent + (Vector)origin);
     }
 
     private void DrawHighlight(DrawingContext context, Pen pen, IReadOnlyCollection<string> keys, Vector offset)
