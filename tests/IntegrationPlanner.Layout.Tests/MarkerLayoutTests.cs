@@ -8,7 +8,7 @@ public sealed class MarkerLayoutTests
     private static readonly string MarkerKey = SceneKeys.Marker(new MarkerId("marker"));
     private static readonly double Gap = TestPlan.Options.MarkerGap;
 
-    public static TheoryData<MarkerDirection, double, double> TipOffsets => new()
+    public static TheoryData<double, double, double> TipOffsets => new()
     {
         { MarkerDirection.FromTop, 0, -Gap },
         { MarkerDirection.FromBottom, 0, Gap },
@@ -18,7 +18,7 @@ public sealed class MarkerLayoutTests
 
     [Theory]
     [MemberData(nameof(TipOffsets))]
-    public void MarkerOnBranchStep_PointsAtTheLaneAtThatStep(MarkerDirection direction, double offsetX, double offsetY)
+    public void MarkerOnBranchStep_PointsAtTheLaneAtThatStep(double direction, double offsetX, double offsetY)
     {
         Plan plan = PlanWithMarker(new BranchStepAnchor(TestPlan.Develop, 3), direction);
 
@@ -99,7 +99,11 @@ public sealed class MarkerLayoutTests
     [InlineData(MarkerDirection.FromBottom, -90)]
     [InlineData(MarkerDirection.FromLeft, 0)]
     [InlineData(MarkerDirection.FromRight, 0)]
-    public void MarkerLabel_RunsAlongTheShaft(MarkerDirection direction, double expectedAngle)
+    [InlineData(45, 45)]
+    [InlineData(135, -45)]
+    [InlineData(225, 45)]
+    [InlineData(315, -45)]
+    public void MarkerLabel_RunsAlongTheShaft(double direction, double expectedAngle)
     {
         Plan plan = PlanWithMarker(new BranchStepAnchor(TestPlan.Develop, 3), direction);
 
@@ -108,7 +112,7 @@ public sealed class MarkerLayoutTests
         Assert.Equal(expectedAngle, scene.Text(MarkerKey).Angle);
     }
 
-    private static Plan PlanWithMarker(MarkerAnchor anchor, MarkerDirection direction, ProgressState state = ProgressState.Done) =>
+    private static Plan PlanWithMarker(MarkerAnchor anchor, double direction, ProgressState state = ProgressState.Done) =>
         TestPlan.Create(
             [TestPlan.Mainline(), TestPlan.LaneOf(TestPlan.Feature, -2, 0, 4)],
             [TestPlan.Merge("merge", TestPlan.Feature, TestPlan.Develop, 4)],

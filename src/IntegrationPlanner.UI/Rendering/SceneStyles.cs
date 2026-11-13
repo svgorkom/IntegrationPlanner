@@ -10,7 +10,7 @@ public static class SceneStyles
 {
     public static bool IsDashed(LineStyle style) => style == LineStyle.PlannedConnector;
 
-    public static bool IsBold(TextStyle style) => style == TextStyle.Title;
+    public static bool IsBold(TextStyle style) => style is TextStyle.Title or TextStyle.MarkerLabel or TextStyle.PlannedMarkerLabel;
 
     public static bool IsStruckThrough(TextStyle style) =>
         style is TextStyle.CancelledBranchName or TextStyle.CancelledBranchSummary;

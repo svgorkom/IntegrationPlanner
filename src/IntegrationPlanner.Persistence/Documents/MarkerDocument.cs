@@ -12,7 +12,20 @@ internal sealed class MarkerDocument
 
     public AnchorDocument? Anchor { get; set; }
 
-    public MarkerDirection? Direction { get; set; }
+    public double? Angle { get; set; }
+
+    public double? Length { get; set; }
+
+    // Files written before free rotation only carry one of four directions.
+    public LegacyMarkerDirection? Direction { get; set; }
 
     public ProgressState? State { get; set; }
+}
+
+internal enum LegacyMarkerDirection
+{
+    FromTop,
+    FromBottom,
+    FromLeft,
+    FromRight,
 }

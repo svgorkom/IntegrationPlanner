@@ -21,7 +21,7 @@ public sealed record LayoutOptions
 
     public double ConnectorLabelFontSize { get; init; } = 11;
 
-    public double MarkerLabelFontSize { get; init; } = 12;
+    public double MarkerLabelFontSize { get; init; } = 14;
 
     public double SummaryWrapWidth { get; init; } = 230;
 
@@ -34,11 +34,9 @@ public sealed record LayoutOptions
 
     public double LabelPadding { get; init; } = 3;
 
-    public double MarkerLength { get; init; } = 200;
+    public double MarkerShaftWidth { get; init; } = 28;
 
-    public double MarkerShaftWidth { get; init; } = 22;
-
-    public double MarkerHeadWidth { get; init; } = 60;
+    public double MarkerHeadWidth { get; init; } = 64;
 
     public double MarkerHeadLength { get; init; } = 30;
 

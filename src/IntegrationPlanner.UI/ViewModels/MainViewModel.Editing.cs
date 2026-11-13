@@ -3,6 +3,7 @@ using IntegrationPlanner.Core.Editing;
 using IntegrationPlanner.Core.Editing.Commands;
 using IntegrationPlanner.Core.Model;
 using IntegrationPlanner.Jira;
+using IntegrationPlanner.Layout.Scene;
 using IntegrationPlanner.UI.Editing;
 using IntegrationPlanner.UI.Localization;
 using IntegrationPlanner.UI.ViewModels.Properties;
@@ -17,6 +18,7 @@ public sealed partial class MainViewModel
     private EditorSelection? _selection;
     private bool _isSynchronizing;
     private bool _isSelecting;
+    private ScenePoint? _reshapeAnchor;
 
     [ObservableProperty]
     private BranchItem? _selectedBranch;
@@ -147,6 +149,47 @@ public sealed partial class MainViewModel
         if (command is not null)
         {
             _editor!.Execute(command);
+        }
+    }
+
+    // Previews stand in for the scene until the drag ends; only the committed result becomes an undoable edit.
+    [RelayCommand]
+    private void ReshapeMarker(SceneReshape? reshape)
+    {
+        if (reshape is null || _editor is null || CurrentScenario is not Scenario scenario
+            || SceneSelection.FromKey(reshape.Key) is not MarkerSelection selected
+            || scenario.Markers.Find(item => item.Id == selected.MarkerId) is not Marker marker)
+        {
+            return;
+        }
+
+        if (reshape.Phase == ReshapePhase.Cancel)
+        {
+            _reshapeAnchor = null;
+            Relayout();
+            return;
+        }
+
+        _reshapeAnchor ??= Scene is null ? null : MarkerReshaper.AnchorOf(Scene, reshape.Key, _layoutOptions.MarkerGap);
+        Marker? reshaped = _reshapeAnchor is ScenePoint anchor
+            ? MarkerReshaper.Reshape(marker, anchor, new ScenePoint(reshape.X, reshape.Y), _layoutOptions.MarkerGap)
+            : null;
+        if (reshape.Phase == ReshapePhase.Commit)
+        {
+            _reshapeAnchor = null;
+            if (reshaped is null || reshaped == marker)
+            {
+                Relayout();
+                return;
+            }
+
+            _editor.Execute(new UpdateMarkerCommand(scenario.Id, reshaped));
+            return;
+        }
+
+        if (reshaped is not null)
+        {
+            Scene = _layoutEngine.Layout(new UpdateMarkerCommand(scenario.Id, reshaped).Apply(_editor.Current), scenario.Id);
         }
     }
 

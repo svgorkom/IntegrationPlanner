@@ -78,7 +78,8 @@ internal static class PlanDocumentMapper
                 ConnectorAnchor anchor => new AnchorDocument { ConnectorId = anchor.ConnectorId.Value },
                 _ => throw new ArgumentOutOfRangeException(nameof(marker), marker.Anchor, $"Unsupported {nameof(MarkerAnchor)} type."),
             },
-            Direction = marker.Direction,
+            Angle = marker.Angle,
+            Length = marker.Length,
             State = marker.State,
         };
 
@@ -126,8 +127,19 @@ internal static class PlanDocumentMapper
             Require(document.Kind, "marker.kind"),
             document.Label ?? string.Empty,
             ToAnchor(document.Anchor),
-            Require(document.Direction, "marker.direction"),
-            Require(document.State, "marker.state"));
+            ToAngle(document),
+            Require(document.State, "marker.state"),
+            document.Length ?? Marker.DefaultLength);
+
+    private static double ToAngle(MarkerDocument document) =>
+        document.Angle ?? document.Direction switch
+        {
+            LegacyMarkerDirection.FromTop => MarkerDirection.FromTop,
+            LegacyMarkerDirection.FromBottom => MarkerDirection.FromBottom,
+            LegacyMarkerDirection.FromLeft => MarkerDirection.FromLeft,
+            LegacyMarkerDirection.FromRight => MarkerDirection.FromRight,
+            _ => throw new PlanFormatException("Missing value for 'marker.angle'."),
+        };
 
     private static MarkerAnchor ToAnchor(AnchorDocument? document)
     {

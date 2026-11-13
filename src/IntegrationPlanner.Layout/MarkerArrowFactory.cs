@@ -13,7 +13,7 @@ internal static class MarkerArrowFactory
         TextLine label = text.Line(marker.Label, isDone ? TextStyle.MarkerLabel : TextStyle.PlannedMarkerLabel, options.MarkerLabelFontSize);
 
         double headLength = options.MarkerHeadLength;
-        double shaftLength = Math.Max(options.MarkerLength - headLength, label.Size.Width + (4 * options.LabelPadding));
+        double shaftLength = Math.Max(marker.Length - headLength, label.Size.Width + (4 * options.LabelPadding));
         double shaftHalf = options.MarkerShaftWidth / 2;
         double headHalf = options.MarkerHeadWidth / 2;
         double tail = -(headLength + shaftLength);
@@ -30,27 +30,29 @@ internal static class MarkerArrowFactory
             new(-headLength, headHalf),
         ];
 
-        double angle = PointingAngle(marker.Direction);
+        double angle = marker.Angle;
         ScenePoint tip = SceneGeometry.Rotate(new ScenePoint(anchor.X - options.MarkerGap, anchor.Y), anchor, angle);
         ImmutableArray<ScenePoint> outline = [.. local.Select(point => Place(point, tip, angle))];
         ScenePoint labelCenter = Place(new ScenePoint(-headLength - (shaftLength / 2), 0), tip, angle);
-        double labelAngle = marker.Direction is MarkerDirection.FromTop or MarkerDirection.FromBottom ? -90 : 0;
 
         string key = SceneKeys.Marker(marker.Id);
         SceneArrow arrow = new(key, outline, isDone ? ArrowStyle.Done : ArrowStyle.Planned);
-        SceneText sceneLabel = new(key, label.Text, labelCenter, label.Size, labelAngle, label.FontSize, label.Style, HasBackground: false);
+        SceneText sceneLabel = new(key, label.Text, labelCenter, label.Size, ReadableAngle(angle), label.FontSize, label.Style, HasBackground: false);
         return (arrow, sceneLabel);
     }
 
     private static ScenePoint Place(ScenePoint local, ScenePoint tip, double angle) =>
         SceneGeometry.Rotate(new ScenePoint(tip.X + local.X, tip.Y + local.Y), tip, angle);
 
-    private static double PointingAngle(MarkerDirection direction) => direction switch
+    // The label runs along the shaft but is never upside down; vertical text reads from bottom to top.
+    private static double ReadableAngle(double angle)
     {
-        MarkerDirection.FromLeft => 0,
-        MarkerDirection.FromTop => 90,
-        MarkerDirection.FromRight => 180,
-        MarkerDirection.FromBottom => 270,
-        _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null),
-    };
+        double normalized = MarkerDirection.Normalize(angle);
+        if (normalized < 90)
+        {
+            return normalized;
+        }
+
+        return normalized < 270 ? normalized - 180 : normalized - 360;
+    }
 }

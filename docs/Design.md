@@ -43,7 +43,7 @@ Reference diagram: `docs/reference/branching-strategy-scenario3.png`.
 **Scenario**: `Id`, `Name` ("Scenario 3: Merge OrderPool reverse^2 to AD-15777"), `StepCount`, `Lanes`, `Connectors`, `Markers`.
 - **Lane**: `BranchId`, `Order` (vertical position; negative = above mainline, positive = below), `StartStep`, `EndStep?`, `ShowFork`, `ForkFromBranchId?`, `ForkStep?`. A branch appears in a scenario only if it has a lane.
 - **Connector**: `Id`, `Kind` (Pull | Merge), `FromBranchId`, `ToBranchId`, `Step`, `Label?`, `State` (Planned | Done).
-- **Marker**: `Id`, `Kind` (ReleaseBuild | IntegrationTest | Testing | Custom), `Label`, `Anchor` (Branch+Step | Connector), `Direction` (FromTop | FromBottom | FromLeft | FromRight), `State`.
+- **Marker**: `Id`, `Kind` (ReleaseBuild | IntegrationTest | Testing | Custom), `Label`, `Anchor` (Branch+Step | Connector), `Angle` (clockwise degrees the arrow points, 0 = from the left), `Length`, `State`. Old files with a `direction` value load as the matching angle.
 
 Data consistency only (not business rules): a reference to a deleted branch/connector is removed along with it (delete branch ⇒ its lanes, connectors, markers removed, undoable). Loading a file with dangling references drops them and reports what was dropped.
 

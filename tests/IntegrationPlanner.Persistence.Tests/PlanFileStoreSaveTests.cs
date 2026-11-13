@@ -24,7 +24,7 @@ public sealed class PlanFileStoreSaveTests : IDisposable
     [InlineData("\"schemaVersion\": 1")]
     [InlineData("\"isMainline\": true")]
     [InlineData("\"kind\": \"releaseBuild\"")]
-    [InlineData("\"direction\": \"fromRight\"")]
+    [InlineData("\"angle\": 180")]
     [InlineData("Feature \\\"A\\\" with ^2 and <tags>")]
     public async Task SaveAsync_WritesReadableCamelCaseJson(string expectedFragment)
     {

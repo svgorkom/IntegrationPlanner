@@ -72,12 +72,18 @@ public static class PlanItemFactory
         {
             ConnectorSelection connector when scenario.Connectors.Exists(item => item.Id == connector.ConnectorId) => new ConnectorAnchor(connector.ConnectorId),
             BranchSelection branch when scenario.Lanes.Find(lane => lane.BranchId == branch.BranchId) is { } lane => new BranchStepAnchor(lane.BranchId, lane.StartStep),
+            MarkerSelection marker when scenario.Markers.Find(item => item.Id == marker.MarkerId) is { } selected => NextTo(scenario, selected.Anchor),
             _ => OrderedLaneBranches(scenario) is [BranchId first, ..] ? new BranchStepAnchor(first, 0) : null,
         };
         return anchor is null
             ? null
             : new Marker(MarkerId.New(), MarkerKind.Custom, UiText.DefaultMarkerLabel, anchor, MarkerDirection.FromTop, ProgressState.Planned);
     }
+
+    // A new marker next to the selected one stays on its branch, one step further so it does not hide it.
+    private static MarkerAnchor NextTo(Scenario scenario, MarkerAnchor anchor) => anchor is BranchStepAnchor branchStep
+        ? branchStep with { Step = Math.Min(branchStep.Step + 1, Math.Max(scenario.StepCount - 1, 0)) }
+        : anchor;
 
     private static List<BranchId> OrderedLaneBranches(Scenario scenario) =>
         [.. scenario.Lanes.OrderBy(lane => lane.Order).ThenBy(lane => lane.StartStep).Select(lane => lane.BranchId)];

@@ -76,14 +76,6 @@ public static class UiText
 
     public static string ChoiceMarkerKindCustom => Get(nameof(ChoiceMarkerKindCustom));
 
-    public static string ChoiceMarkerDirectionFromTop => Get(nameof(ChoiceMarkerDirectionFromTop));
-
-    public static string ChoiceMarkerDirectionFromBottom => Get(nameof(ChoiceMarkerDirectionFromBottom));
-
-    public static string ChoiceMarkerDirectionFromLeft => Get(nameof(ChoiceMarkerDirectionFromLeft));
-
-    public static string ChoiceMarkerDirectionFromRight => Get(nameof(ChoiceMarkerDirectionFromRight));
-
     public static string ChoiceMarkerAnchorBranch => Get(nameof(ChoiceMarkerAnchorBranch));
 
     public static string ChoiceMarkerAnchorConnector => Get(nameof(ChoiceMarkerAnchorConnector));

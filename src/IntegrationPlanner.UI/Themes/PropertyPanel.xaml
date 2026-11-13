@@ -103,12 +103,10 @@
                       AutomationProperties.Name="{loc:Loc FieldKind}" />
             <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldLabel}" />
             <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Label, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldLabel}" />
-            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldDirection}" />
-            <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
-                      ItemsSource="{Binding Directions, Mode=OneTime}"
-                      SelectedValuePath="Value"
-                      SelectedValue="{Binding Direction, Mode=TwoWay}"
-                      AutomationProperties.Name="{loc:Loc FieldDirection}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldAngle}" />
+            <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Angle, Mode=TwoWay, StringFormat={}{0:0.#}}" AutomationProperties.Name="{loc:Loc FieldAngle}" />
+            <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldLength}" />
+            <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Length, Mode=TwoWay, StringFormat={}{0:0.#}}" AutomationProperties.Name="{loc:Loc FieldLength}" />
             <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldState}" />
             <ComboBox Style="{StaticResource PropertyComboBoxStyle}"
                       ItemsSource="{Binding States, Mode=OneTime}"

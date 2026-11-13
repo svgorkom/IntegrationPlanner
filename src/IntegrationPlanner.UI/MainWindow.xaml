@@ -136,6 +136,7 @@
                                        ConnectCommand="{Binding ConnectElementsCommand, Mode=OneTime}"
                                        SelectCommand="{Binding SelectElementCommand, Mode=OneTime}"
                                        MoveCommand="{Binding MoveElementCommand, Mode=OneTime}"
+                                       ReshapeCommand="{Binding ReshapeMarkerCommand, Mode=OneTime}"
                                        SelectedKeys="{Binding SelectedKeys, Mode=OneWay}"
                                        DragTargets="{Binding DragTargets, Mode=OneWay}"
                                        HorizontalSnap="{Binding HorizontalSnap, Mode=OneTime}"

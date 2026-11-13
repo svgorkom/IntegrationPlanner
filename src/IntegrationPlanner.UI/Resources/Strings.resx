@@ -162,18 +162,6 @@
   <data name="ChoiceMarkerKindCustom" xml:space="preserve">
     <value>Custom</value>
   </data>
-  <data name="ChoiceMarkerDirectionFromTop" xml:space="preserve">
-    <value>From top</value>
-  </data>
-  <data name="ChoiceMarkerDirectionFromBottom" xml:space="preserve">
-    <value>From bottom</value>
-  </data>
-  <data name="ChoiceMarkerDirectionFromLeft" xml:space="preserve">
-    <value>From left</value>
-  </data>
-  <data name="ChoiceMarkerDirectionFromRight" xml:space="preserve">
-    <value>From right</value>
-  </data>
   <data name="ChoiceMarkerAnchorBranch" xml:space="preserve">
     <value>Branch at a step</value>
   </data>
@@ -357,8 +345,11 @@
   <data name="FieldState" xml:space="preserve">
     <value>State</value>
   </data>
-  <data name="FieldDirection" xml:space="preserve">
-    <value>Direction</value>
+  <data name="FieldAngle" xml:space="preserve">
+    <value>Angle (degrees)</value>
+  </data>
+  <data name="FieldLength" xml:space="preserve">
+    <value>Length</value>
   </data>
   <data name="FieldAnchor" xml:space="preserve">
     <value>Attached to</value>

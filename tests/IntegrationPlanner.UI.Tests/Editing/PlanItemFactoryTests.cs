@@ -102,6 +102,14 @@ public sealed class PlanItemFactoryTests
     }
 
     [Fact]
+    public void NewMarker_WithAMarkerSelected_StaysOnItsBranchOneStepFurther()
+    {
+        Marker? marker = PlanItemFactory.NewMarker(Scenario, new MarkerSelection(TestPlans.Release));
+
+        Assert.Equal(new BranchStepAnchor(TestPlans.Feature, 4), marker?.Anchor);
+    }
+
+    [Fact]
     public void NewMarker_WithoutSelectionAnchorsToTheFirstLane()
     {
         Marker? marker = PlanItemFactory.NewMarker(Scenario, null);

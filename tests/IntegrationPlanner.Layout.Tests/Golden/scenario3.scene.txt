@@ -24,8 +24,8 @@ line connector/pull-develop-into-xxxxxx Connector (1260.00,0.00) (1281.00,70.00)
 line connector/merge-xxxxxx-into-15777 Connector (1350.00,70.00) (1392.00,210.00)
 line connector/pull-develop-into-15777 Connector (1440.00,0.00) (1503.00,210.00)
 line connector/merge-15777-into-develop Connector (1530.00,210.00) (1593.00,0.00)
-text marker/release-build MarkerLabel "Release build" center=(630.00,-117.00) size=78.00x15.60 angle=-90.00 font=12.00 background=False
-text marker/lots-of-testing MarkerLabel "Lots of testing!" center=(1678.50,105.00) size=96.00x15.60 angle=0.00 font=12.00 background=False
+text marker/release-build MarkerLabel "Release build" center=(630.00,-117.00) size=91.00x18.20 angle=-90.00 font=14.00 background=False
+text marker/lots-of-testing MarkerLabel "Lots of testing!" center=(1678.50,105.00) size=112.00x18.20 angle=0.00 font=14.00 background=False
 text branch-label/ad-16384 BranchName "AD-16384" center=(109.00,-181.05) size=60.00x19.50 angle=0.00 font=15.00 background=False
 text branch-label/ad-16384 BranchSummary "Reverse orderPool extraction to resolved" center=(109.00,-164.48) size=210.00x13.65 angle=0.00 font=10.50 background=False
 text branch-label/ad-16384 BranchSummary "bugs on develop" center=(109.00,-150.83) size=78.75x13.65 angle=0.00 font=10.50 background=False
@@ -64,5 +64,5 @@ text connector-label/pull-develop-into-15777 ConnectorLabel "Pull develop" cente
 text connector-label/merge-15777-into-develop ConnectorLabel "Merge to develop" center=(1542.60,168.00) size=94.00x14.30 angle=-73.30 font=11.00 background=True
 text title Title "Branching strategy." center=(19.50,-271.90) size=152.00x20.80 angle=0.00 font=16.00 background=False
 text title ScenarioName "Scenario 3: Merge OrderPool reverse^2 to AD-15777" center=(127.25,-251.75) size=367.50x19.50 angle=0.00 font=15.00 background=False
-arrow marker/release-build Done (630.00,-2.00) (660.00,-32.00) (641.00,-32.00) (641.00,-202.00) (619.00,-202.00) (619.00,-32.00) (600.00,-32.00)
-arrow marker/lots-of-testing Done (1563.50,105.00) (1593.50,135.00) (1593.50,116.00) (1763.50,116.00) (1763.50,94.00) (1593.50,94.00) (1593.50,75.00)
+arrow marker/release-build Done (630.00,-2.00) (662.00,-32.00) (644.00,-32.00) (644.00,-202.00) (616.00,-202.00) (616.00,-32.00) (598.00,-32.00)
+arrow marker/lots-of-testing Done (1563.50,105.00) (1593.50,137.00) (1593.50,119.00) (1763.50,119.00) (1763.50,91.00) (1593.50,91.00) (1593.50,73.00)

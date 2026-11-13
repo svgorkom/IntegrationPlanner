@@ -1,4 +1,5 @@
 using IntegrationPlanner.Core.Integrity;
+using IntegrationPlanner.Core.Model;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace IntegrationPlanner.Persistence.Tests;
@@ -47,6 +48,19 @@ public sealed class PlanFileStoreLoadTests : IDisposable
         PlanLoadResult result = await _store.LoadAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal(PlanLoadError.Corrupt, result.Error);
+    }
+
+    [Fact]
+    public async Task LoadAsync_MarkerWithLegacyDirection_UsesItsAngleAndDefaultLength()
+    {
+        const string legacyFile = """{ "schemaVersion": 1, "branches": [ { "id": "develop", "name": "Develop" } ], "scenarios": [ { "id": "s", "name": "S", "stepCount": 2, "lanes": [ { "branchId": "develop", "order": 0, "startStep": 0 } ], "markers": [ { "id": "m", "kind": "testing", "anchor": { "branchId": "develop", "step": 1 }, "direction": "fromBottom", "state": "done" } ] } ] }""";
+        string path = await WriteAsync("legacy.iplan.json", legacyFile);
+
+        PlanLoadResult result = await _store.LoadAsync(path, TestContext.Current.CancellationToken);
+
+        Marker marker = Assert.Single(Assert.Single(result.Plan!.Scenarios).Markers);
+        Assert.Equal(MarkerDirection.FromBottom, marker.Angle);
+        Assert.Equal(Marker.DefaultLength, marker.Length);
     }
 
     [Fact]

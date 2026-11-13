@@ -36,14 +36,6 @@ public static class Choices
         new(MarkerKind.Custom, UiText.ChoiceMarkerKindCustom),
     ];
 
-    public static IReadOnlyList<Choice<MarkerDirection>> MarkerDirections { get; } =
-    [
-        new(MarkerDirection.FromTop, UiText.ChoiceMarkerDirectionFromTop),
-        new(MarkerDirection.FromBottom, UiText.ChoiceMarkerDirectionFromBottom),
-        new(MarkerDirection.FromLeft, UiText.ChoiceMarkerDirectionFromLeft),
-        new(MarkerDirection.FromRight, UiText.ChoiceMarkerDirectionFromRight),
-    ];
-
     public static IReadOnlyList<Choice<MarkerAnchorKind>> MarkerAnchorKinds { get; } =
     [
         new(MarkerAnchorKind.Branch, UiText.ChoiceMarkerAnchorBranch),

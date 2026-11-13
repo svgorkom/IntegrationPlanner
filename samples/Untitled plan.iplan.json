@@ -61,9 +61,22 @@
           "label": "Execute throughput tests",
           "anchor": {
             "branchId": "f08f09b8388a4aea901cf1c9aded6bd6",
-            "step": 3
+            "step": 4
           },
-          "direction": "fromTop",
+          "angle": 124.38272335459747,
+          "length": 146.75291988351668,
+          "state": "planned"
+        },
+        {
+          "id": "4e65726fda2644828cffc9bcdb0e597b",
+          "kind": "custom",
+          "label": "New marker",
+          "anchor": {
+            "branchId": "59ead55562684b648d89a7bb10e6e199",
+            "step": 4
+          },
+          "angle": 327.5962043414978,
+          "length": 224.438189050053,
           "state": "planned"
         }
       ]

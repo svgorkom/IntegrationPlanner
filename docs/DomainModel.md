@@ -11,7 +11,7 @@ Source of truth: `docs/Design.md` section 2 (v0.2). The model is **data only**: 
 | `Scenario` | `Id`, `Name`, `StepCount`, `Lanes`, `Connectors`, `Markers` | One diagram. The horizontal axis is ordered steps; there are no dates (D7). |
 | `Lane` | `BranchId`, `Order`, `StartStep`, `EndStep?`, `ShowFork`, `ForkFromBranchId?`, `ForkStep?` | Places a branch in a scenario. `Order` < 0 is above the mainline, > 0 below. No `EndStep` means "to the last step". The fork line is optional (D5). |
 | `Connector` | `Id`, `Kind` (Pull, Merge), `FromBranchId`, `ToBranchId`, `Step`, `Label?`, `State` | May connect any two branches (D3). |
-| `Marker` | `Id`, `Kind` (ReleaseBuild, IntegrationTest, Testing, Custom), `Label`, `Anchor`, `Direction` (FromTop, FromBottom, FromLeft, FromRight), `State` | Anchored to a branch at a step (`BranchStepAnchor`) or to a connector (`ConnectorAnchor`) (D6). |
+| `Marker` | `Id`, `Kind` (ReleaseBuild, IntegrationTest, Testing, Custom), `Label`, `Anchor`, `Angle` (degrees, 0 = from the left, clockwise), `Length`, `State` | Anchored to a branch at a step (`BranchStepAnchor`) or to a connector (`ConnectorAnchor`) (D6). |
 
 `State` is `Planned` or `Done` (D8); rendering draws Planned dashed and Done solid.
 

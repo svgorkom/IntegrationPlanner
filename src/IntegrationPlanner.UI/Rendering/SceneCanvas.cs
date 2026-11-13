@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using IntegrationPlanner.Core.Model;
 using IntegrationPlanner.Layout.Scene;
 using IntegrationPlanner.UI.Editing;
 
@@ -50,7 +52,16 @@ public sealed class SceneCanvas : FrameworkElement
     public static readonly DependencyProperty ConnectPreviewBrushProperty = DependencyProperty.Register(
         nameof(ConnectPreviewBrush), typeof(Brush), typeof(SceneCanvas), new PropertyMetadata(null, OnOverlayInputChanged));
 
+    public static readonly DependencyProperty ReshapeCommandProperty = DependencyProperty.Register(
+        nameof(ReshapeCommand), typeof(ICommand), typeof(SceneCanvas), new PropertyMetadata(null));
+
     private const double HitTolerance = 5;
+    private const double HandleRadius = 7;
+    private const double HandleHitRadius = 11;
+    private const double HandleRingThickness = 2;
+    private const double ReadoutOffset = 14;
+    private const double ReadoutPadding = 3;
+    private const double ReadoutFontSize = 12;
     private const double HighlightThickness = 6;
     private const double DragThreshold = 3;
     private const double ConnectPreviewThickness = 2;
@@ -61,6 +72,8 @@ public sealed class SceneCanvas : FrameworkElement
     private readonly DrawingVisual _overlay = new();
     private string? _dragKey;
     private string? _connectKey;
+    private string? _reshapeKey;
+    private bool _hasReshaped;
     private Point _dragStart;
     private Point _connectCurrent;
     private Vector _dragOffset;
@@ -137,6 +150,12 @@ public sealed class SceneCanvas : FrameworkElement
         set => SetValue(ConnectPreviewBrushProperty, value);
     }
 
+    public ICommand? ReshapeCommand
+    {
+        get => (ICommand?)GetValue(ReshapeCommandProperty);
+        set => SetValue(ReshapeCommandProperty, value);
+    }
+
     public event EventHandler<SceneRenameRequestedEventArgs>? RenameRequested;
 
     protected override int VisualChildrenCount => 2;
@@ -174,6 +193,15 @@ public sealed class SceneCanvas : FrameworkElement
         }
 
         Point position = e.GetPosition(this);
+        if (e.ClickCount == 1 && HandleKeyAt(position) is string handleKey && CaptureMouse())
+        {
+            _reshapeKey = handleKey;
+            _hasReshaped = false;
+            Cursor = Cursors.Hand;
+            e.Handled = true;
+            return;
+        }
+
         string? key = SceneHitTester.HitTest(Scene, ToScene(position), HitTolerance);
         Execute(SelectCommand, key);
         if (key is null || key == SceneKeys.Title)
@@ -223,6 +251,15 @@ public sealed class SceneCanvas : FrameworkElement
     {
         ArgumentNullException.ThrowIfNull(e);
         base.OnMouseMove(e);
+        if (_reshapeKey is not null)
+        {
+            _hasReshaped = true;
+            ScenePoint pointer = ToScene(e.GetPosition(this));
+            Execute(ReshapeCommand, new SceneReshape(_reshapeKey, pointer.X, pointer.Y, ReshapePhase.Preview));
+            return;
+        }
+
+        Cursor = HandleKeyAt(e.GetPosition(this)) is null ? null : Cursors.Hand;
         if (_connectKey is not null)
         {
             _connectCurrent = e.GetPosition(this);
@@ -266,6 +303,12 @@ public sealed class SceneCanvas : FrameworkElement
     {
         ArgumentNullException.ThrowIfNull(e);
         base.OnMouseLeftButtonUp(e);
+        if (_reshapeKey is not null)
+        {
+            CompleteReshape(e);
+            return;
+        }
+
         if (_connectKey is not null)
         {
             CompleteConnect(e);
@@ -293,10 +336,51 @@ public sealed class SceneCanvas : FrameworkElement
     protected override void OnLostMouseCapture(MouseEventArgs e)
     {
         base.OnLostMouseCapture(e);
+        string? reshapeKey = _reshapeKey;
+        _reshapeKey = null;
         _dragKey = null;
         _connectKey = null;
         _dragOffset = default;
+        if (reshapeKey is not null)
+        {
+            Execute(ReshapeCommand, new SceneReshape(reshapeKey, 0, 0, ReshapePhase.Cancel));
+        }
+
         RedrawOverlay();
+    }
+
+    // The tail handle of the selected marker; null when no marker is selected or the pointer is elsewhere.
+    private string? HandleKeyAt(Point position)
+    {
+        if (Scene is null || SceneArrowSelected() is not SceneArrow arrow)
+        {
+            return null;
+        }
+
+        ScenePoint tail = MarkerReshaper.TailCenter(arrow);
+        ScenePoint pointer = ToScene(position);
+        return Math.Sqrt(Math.Pow(pointer.X - tail.X, 2) + Math.Pow(pointer.Y - tail.Y, 2)) <= HandleHitRadius ? arrow.Key : null;
+    }
+
+    private SceneArrow? SceneArrowSelected()
+    {
+        if (Scene is null || SelectedKeys is not { Count: > 0 } selected)
+        {
+            return null;
+        }
+
+        return Scene.Arrows.FirstOrDefault(arrow => arrow.Outline.Length >= 5 && selected.Contains(arrow.Key));
+    }
+
+    private void CompleteReshape(MouseButtonEventArgs e)
+    {
+        string key = _reshapeKey!;
+        _reshapeKey = null;
+        ScenePoint pointer = ToScene(e.GetPosition(this));
+        ReleaseMouseCapture();
+        Cursor = null;
+        e.Handled = true;
+        Execute(ReshapeCommand, new SceneReshape(key, pointer.X, pointer.Y, _hasReshaped ? ReshapePhase.Commit : ReshapePhase.Cancel));
     }
 
     public void RequestRename(string? key)
@@ -398,6 +482,45 @@ public sealed class SceneCanvas : FrameworkElement
         }
 
         DrawConnectPreview(context);
+        DrawHandle(context);
+    }
+
+    private void DrawHandle(DrawingContext context)
+    {
+        if (SceneArrowSelected() is not SceneArrow arrow || Palette is null)
+        {
+            return;
+        }
+
+        ScenePoint tailPoint = MarkerReshaper.TailCenter(arrow);
+        Point tail = new(tailPoint.X, tailPoint.Y);
+        Pen ring = new(new SolidColorBrush(Palette.BackgroundColor), HandleRingThickness);
+        context.DrawEllipse(HighlightBrush, ring, tail, HandleRadius, HandleRadius);
+        if (_reshapeKey is null)
+        {
+            return;
+        }
+
+        double dx = arrow.Outline[0].X - tailPoint.X;
+        double dy = arrow.Outline[0].Y - tailPoint.Y;
+        double angle = MarkerDirection.Normalize(Math.Atan2(dy, dx) * 180 / Math.PI);
+        string readout = string.Create(CultureInfo.CurrentCulture, $"{angle:0}°  {Math.Sqrt((dx * dx) + (dy * dy)):0}");
+        FormattedText text = new(
+            readout,
+            CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            new Typeface(Palette.FontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+            ReadoutFontSize,
+            new SolidColorBrush(Palette.TextColor),
+            VisualTreeHelper.GetDpi(this).PixelsPerDip);
+        Point origin = new(tail.X + ReadoutOffset, tail.Y - ReadoutOffset - text.Height);
+        context.DrawRoundedRectangle(
+            new SolidColorBrush(Palette.BackgroundColor),
+            new Pen(HighlightBrush, 1),
+            new Rect(origin.X - ReadoutPadding, origin.Y - ReadoutPadding, text.Width + (2 * ReadoutPadding), text.Height + (2 * ReadoutPadding)),
+            2,
+            2);
+        context.DrawText(text, origin);
     }
 
     private void DrawConnectPreview(DrawingContext context)

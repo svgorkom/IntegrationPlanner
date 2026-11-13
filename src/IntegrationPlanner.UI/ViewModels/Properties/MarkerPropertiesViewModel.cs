@@ -17,7 +17,10 @@ public sealed partial class MarkerPropertiesViewModel : PropertiesViewModel
     private string _label = string.Empty;
 
     [ObservableProperty]
-    private MarkerDirection _direction;
+    private double _angle;
+
+    [ObservableProperty]
+    private double _length;
 
     [ObservableProperty]
     private ProgressState _state;
@@ -54,8 +57,6 @@ public sealed partial class MarkerPropertiesViewModel : PropertiesViewModel
 
     public IReadOnlyList<Choice<MarkerKind>> Kinds => Choices.MarkerKinds;
 
-    public IReadOnlyList<Choice<MarkerDirection>> Directions => Choices.MarkerDirections;
-
     public IReadOnlyList<Choice<ProgressState>> States => Choices.ProgressStates;
 
     public IReadOnlyList<Choice<MarkerAnchorKind>> AnchorKinds => Choices.MarkerAnchorKinds;
@@ -72,7 +73,8 @@ public sealed partial class MarkerPropertiesViewModel : PropertiesViewModel
         SetChoices(ref _connectors, Choices.Connectors(plan, scenario), nameof(Connectors));
         Kind = marker.Kind;
         Label = marker.Label;
-        Direction = marker.Direction;
+        Angle = marker.Angle;
+        Length = marker.Length;
         State = marker.State;
         AnchorKind = marker.Anchor is ConnectorAnchor ? MarkerAnchorKind.Connector : MarkerAnchorKind.Branch;
         AnchorBranchId = marker.Anchor is BranchStepAnchor branchAnchor ? branchAnchor.BranchId.Value : string.Empty;
@@ -85,7 +87,9 @@ public sealed partial class MarkerPropertiesViewModel : PropertiesViewModel
 
     partial void OnLabelChanged(string value) => Commit();
 
-    partial void OnDirectionChanged(MarkerDirection value) => Commit();
+    partial void OnAngleChanged(double value) => Commit();
+
+    partial void OnLengthChanged(double value) => Commit();
 
     partial void OnStateChanged(ProgressState value) => Commit();
 
@@ -128,7 +132,15 @@ public sealed partial class MarkerPropertiesViewModel : PropertiesViewModel
             return;
         }
 
-        Marker updated = current with { Kind = Kind, Label = Label, Direction = Direction, State = State, Anchor = anchor };
+        Marker updated = current with
+        {
+            Kind = Kind,
+            Label = Label,
+            Angle = MarkerDirection.Normalize(Angle),
+            Length = Math.Max(Length, Marker.MinimumLength),
+            State = State,
+            Anchor = anchor,
+        };
         if (updated != current)
         {
             Execute(new UpdateMarkerCommand(scenario.Id, updated));

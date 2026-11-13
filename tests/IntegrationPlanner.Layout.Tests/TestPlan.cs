@@ -49,8 +49,8 @@ internal static class TestPlan
     public static Connector Merge(string id, BranchId from, BranchId to, int step, string? label = null, ProgressState state = ProgressState.Done) =>
         new(new ConnectorId(id), ConnectorKind.Merge, from, to, step, label, state);
 
-    public static Marker MarkerOn(MarkerAnchor anchor, MarkerDirection direction, ProgressState state = ProgressState.Done) =>
-        new(new MarkerId("marker"), MarkerKind.ReleaseBuild, "Release build", anchor, direction, state);
+    public static Marker MarkerOn(MarkerAnchor anchor, double angle, ProgressState state = ProgressState.Done) =>
+        new(new MarkerId("marker"), MarkerKind.ReleaseBuild, "Release build", anchor, angle, state);
 
     public static DiagramScene Layout(Plan plan) =>
         new DiagramLayoutEngine(new FixedWidthTextMeasurer(), Options).Layout(plan, ScenarioId);
