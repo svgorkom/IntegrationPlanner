@@ -21,7 +21,7 @@ Reference diagram: `docs/reference/branching-strategy-scenario3.png`.
 | D13 | Jira Data Center integration (PAT, one-way import of tickets into branches) lives in `IntegrationPlanner.Jira`; two-way sync and PR integration deferred. |
 | D14 | UI English only; all strings in `Strings.resx`. |
 | D15 | WPF on .NET 10. Old `.github`/`.claude` scaffolding removed. |
-| D16 | (P3, user) Canvas drag: left-drag on an item moves it; left-drag on empty space pans. Lanes move vertically (`Order`); connectors and branch-anchored markers move horizontally (`Step`). Nothing else is draggable. |
+| D16 | (P3, user) Canvas drag: left-drag on an item moves it; left-drag on empty space pans. Lanes move vertically (`Order`); connectors move horizontally (`Step`); markers move freely and snap to a lane step or a connector midpoint. A selected connector's end handles reconnect it to another lane. Esc cancels a drag. |
 | D17 | (P3, user) No help function; help pages dropped from scope. |
 | D18 | (P3, user) New, Save and Save As; unsaved changes prompt (Yes (save) / No (discard) / Cancel) before New, Open and closing the app. |
 
@@ -68,7 +68,7 @@ Simplified from v0.1: no Application/ports layer and no audit, because without r
 
 ## 5. UI
 - Left: plan explorer (scenarios, branch catalogue). Centre: canvas (zoom/pan, select, drag steps/lanes, D16). Right: property panel for the selection.
-- Toolbar: New/Open/Save/Save As, Add branch, Add pull, Add merge, Add marker, Delete, Undo/Redo, Export PNG/SVG, Copy.
+- Toolbar: New/Open/Save/Save As, Add branch, Add marker, Add merge, Add pull, Delete, Undo/Redo, Export PNG/SVG, Copy.
 - Strings in `Strings.resx`; styles/colours in `Themes/Theme.xaml` (teal `#1F5670`-like, red for cancelled).
 - No help pages (D17).
 

@@ -85,6 +85,16 @@ public sealed class PlanItemFactoryTests
         Assert.Null(connector);
     }
 
+    [Theory]
+    [InlineData(4, 4)]
+    [InlineData(99, 5)]
+    public void NewConnector_StartsAtTheRequestedStepWithinTheScenario(int step, int expected)
+    {
+        Connector? connector = PlanItemFactory.NewConnector(Plan, Scenario, ConnectorKind.Merge, TestPlans.Feature, step);
+
+        Assert.Equal(expected, connector?.Step);
+    }
+
     [Fact]
     public void NewMarker_AnchorsToTheSelectedConnector()
     {

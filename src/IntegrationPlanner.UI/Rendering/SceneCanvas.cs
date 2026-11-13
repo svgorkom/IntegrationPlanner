@@ -8,9 +8,10 @@ using IntegrationPlanner.UI.Editing;
 
 namespace IntegrationPlanner.UI.Rendering;
 
-// Hosts the rendered scene as a DrawingVisual and sizes itself to the scene bounds. A second visual shows the
-// selection and the snapped preview while an item is dragged. Pressing on empty space is left to the
-// surrounding scroll viewer, which pans (U1).
+// Hosts the rendered scene as a DrawingVisual and sizes itself to the scene bounds. A second visual shows hover,
+// selection, handles and the snapped preview while an item is dragged. Pressing on empty space is left to the
+// surrounding scroll viewer, which pans (U1). Pointer tolerances and handle sizes are in screen pixels, so they stay
+// usable at every zoom level.
 public sealed class SceneCanvas : FrameworkElement
 {
     public static readonly DependencyProperty SceneProperty = DependencyProperty.Register(
@@ -43,6 +44,12 @@ public sealed class SceneCanvas : FrameworkElement
     public static readonly DependencyProperty VerticalSnapProperty = DependencyProperty.Register(
         nameof(VerticalSnap), typeof(double), typeof(SceneCanvas), new PropertyMetadata(1.0));
 
+    public static readonly DependencyProperty MarkerGapProperty = DependencyProperty.Register(
+        nameof(MarkerGap), typeof(double), typeof(SceneCanvas), new PropertyMetadata(0.0));
+
+    public static readonly DependencyProperty ZoomProperty = DependencyProperty.Register(
+        nameof(Zoom), typeof(double), typeof(SceneCanvas), new PropertyMetadata(1.0, OnOverlayInputChanged));
+
     public static readonly DependencyProperty HighlightBrushProperty = DependencyProperty.Register(
         nameof(HighlightBrush), typeof(Brush), typeof(SceneCanvas), new PropertyMetadata(null, OnOverlayInputChanged));
 
@@ -55,7 +62,16 @@ public sealed class SceneCanvas : FrameworkElement
     public static readonly DependencyProperty ReshapeCommandProperty = DependencyProperty.Register(
         nameof(ReshapeCommand), typeof(ICommand), typeof(SceneCanvas), new PropertyMetadata(null));
 
-    private const double HitTolerance = 5;
+    public static readonly DependencyProperty RetargetCommandProperty = DependencyProperty.Register(
+        nameof(RetargetCommand), typeof(ICommand), typeof(SceneCanvas), new PropertyMetadata(null));
+
+    public static readonly DependencyProperty ContextPointProperty = DependencyProperty.Register(
+        nameof(ContextPoint),
+        typeof(ScenePoint?),
+        typeof(SceneCanvas),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+    private const double HitTolerance = 7;
     private const double HandleRadius = 7;
     private const double HandleHitRadius = 11;
     private const double HandleRingThickness = 2;
@@ -63,25 +79,38 @@ public sealed class SceneCanvas : FrameworkElement
     private const double ReadoutPadding = 3;
     private const double ReadoutFontSize = 12;
     private const double HighlightThickness = 6;
+    private const double HoverOpacity = 0.35;
     private const double DragThreshold = 3;
     private const double ConnectPreviewThickness = 2;
     private const double RenameFallbackWidth = 120;
     private const double RenameFallbackHeight = 22;
+    private const double MinimumZoom = 0.05;
 
     private readonly DrawingVisual _visual = new();
     private readonly DrawingVisual _overlay = new();
     private string? _dragKey;
     private string? _connectKey;
     private string? _reshapeKey;
+    private string? _hoverKey;
+    private CanvasHandle? _retarget;
+    private MarkerDrop? _markerDrop;
+    private ScenePoint? _dragAnchor;
     private bool _hasReshaped;
     private Point _dragStart;
-    private Point _connectCurrent;
+    private Point _pointer;
     private Vector _dragOffset;
 
     public SceneCanvas()
     {
         AddVisualChild(_visual);
         AddVisualChild(_overlay);
+    }
+
+    private enum HandleKind
+    {
+        MarkerTail,
+        ConnectorFrom,
+        ConnectorTo,
     }
 
     public DiagramScene? Scene
@@ -132,6 +161,18 @@ public sealed class SceneCanvas : FrameworkElement
         set => SetValue(VerticalSnapProperty, value);
     }
 
+    public double MarkerGap
+    {
+        get => (double)GetValue(MarkerGapProperty);
+        set => SetValue(MarkerGapProperty, value);
+    }
+
+    public double Zoom
+    {
+        get => (double)GetValue(ZoomProperty);
+        set => SetValue(ZoomProperty, value);
+    }
+
     public Brush? HighlightBrush
     {
         get => (Brush?)GetValue(HighlightBrushProperty);
@@ -156,6 +197,18 @@ public sealed class SceneCanvas : FrameworkElement
         set => SetValue(ReshapeCommandProperty, value);
     }
 
+    public ICommand? RetargetCommand
+    {
+        get => (ICommand?)GetValue(RetargetCommandProperty);
+        set => SetValue(RetargetCommandProperty, value);
+    }
+
+    public ScenePoint? ContextPoint
+    {
+        get => (ScenePoint?)GetValue(ContextPointProperty);
+        set => SetValue(ContextPointProperty, value);
+    }
+
     public event EventHandler<SceneRenameRequestedEventArgs>? RenameRequested;
 
     protected override int VisualChildrenCount => 2;
@@ -166,6 +219,28 @@ public sealed class SceneCanvas : FrameworkElement
         1 => _overlay,
         _ => throw new ArgumentOutOfRangeException(nameof(index)),
     };
+
+    // Abandons the drag in progress without changing the plan; false when nothing was being dragged.
+    public bool CancelInteraction()
+    {
+        if (!IsMouseCaptured)
+        {
+            return false;
+        }
+
+        ReleaseMouseCapture();
+        return true;
+    }
+
+    public void RequestRename(string? key)
+    {
+        if (key is null || Scene is null || RenameBounds(Scene, key) is not SceneRect bounds)
+        {
+            return;
+        }
+
+        RenameRequested?.Invoke(this, new SceneRenameRequestedEventArgs(key, new Rect(bounds.Left - Scene.Bounds.Left, bounds.Top - Scene.Bounds.Top, bounds.Width, bounds.Height)));
+    }
 
     protected override Size MeasureOverride(Size availableSize) =>
         Scene is null ? default : new Size(Scene.Bounds.Width, Scene.Bounds.Height);
@@ -193,16 +268,14 @@ public sealed class SceneCanvas : FrameworkElement
         }
 
         Point position = e.GetPosition(this);
-        if (e.ClickCount == 1 && HandleKeyAt(position) is string handleKey && CaptureMouse())
+        if (e.ClickCount == 1 && HandleAt(position) is CanvasHandle handle && CaptureMouse())
         {
-            _reshapeKey = handleKey;
-            _hasReshaped = false;
-            Cursor = Cursors.Hand;
+            StartHandleDrag(handle, position);
             e.Handled = true;
             return;
         }
 
-        string? key = SceneHitTester.HitTest(Scene, ToScene(position), HitTolerance);
+        string? key = HitTest(position);
         Execute(SelectCommand, key);
         if (key is null || key == SceneKeys.Title)
         {
@@ -217,23 +290,25 @@ public sealed class SceneCanvas : FrameworkElement
         }
 
         // Pressing on a lane line itself starts a connection; the branch label and the fork keep reordering lanes.
-        if (IsLane(key) && ConnectCommand is not null)
+        if (IsKind(key, SceneElementKind.Lane) && ConnectCommand is not null)
         {
             if (CaptureMouse())
             {
                 _connectKey = key;
                 _dragStart = position;
-                _connectCurrent = position;
+                _pointer = position;
             }
 
             return;
         }
 
-        if (DragTargets?.ContainsKey(key) == true && CaptureMouse())
+        if (DragTargets?.TryGetValue(key, out SceneDragTarget? target) == true && CaptureMouse())
         {
             _dragKey = key;
             _dragStart = position;
             _dragOffset = default;
+            _dragAnchor = target.Axis == DragAxis.Both ? MarkerReshaper.AnchorOf(Scene, key, MarkerGap) : null;
+            Cursor = CursorFor(target.Axis);
         }
     }
 
@@ -241,62 +316,61 @@ public sealed class SceneCanvas : FrameworkElement
     {
         ArgumentNullException.ThrowIfNull(e);
         base.OnMouseRightButtonDown(e);
-        if (Scene is not null)
+        if (Scene is null)
         {
-            Execute(SelectCommand, SceneHitTester.HitTest(Scene, ToScene(e.GetPosition(this)), HitTolerance));
+            return;
         }
+
+        Point position = e.GetPosition(this);
+        ContextPoint = ToScene(position);
+        Execute(SelectCommand, HitTest(position));
     }
 
     protected override void OnMouseMove(MouseEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);
         base.OnMouseMove(e);
-        if (_reshapeKey is not null)
-        {
-            _hasReshaped = true;
-            ScenePoint pointer = ToScene(e.GetPosition(this));
-            Execute(ReshapeCommand, new SceneReshape(_reshapeKey, pointer.X, pointer.Y, ReshapePhase.Preview));
-            return;
-        }
-
-        Cursor = HandleKeyAt(e.GetPosition(this)) is null ? null : Cursors.Hand;
-        if (_connectKey is not null)
-        {
-            _connectCurrent = e.GetPosition(this);
-            RedrawOverlay();
-            return;
-        }
-
-        if (_dragKey is null)
-        {
-            UpdateToolTip(e.GetPosition(this));
-        }
-
-        if (_dragKey is null || DragTargets is not { } targets || !targets.TryGetValue(_dragKey, out SceneDragTarget? target))
-        {
-            return;
-        }
-
-        Vector delta = e.GetPosition(this) - _dragStart;
-        Vector offset = target.Axis == DragAxis.Horizontal
-            ? new Vector(DragPlanner.SnapDistance(delta.X, HorizontalSnap), 0)
-            : new Vector(0, DragPlanner.SnapDistance(delta.Y, VerticalSnap));
-        if (offset != _dragOffset)
-        {
-            _dragOffset = offset;
-            RedrawOverlay();
-        }
-    }
-
-    private void UpdateToolTip(Point position)
-    {
         if (Scene is null)
         {
             return;
         }
 
-        string? key = SceneHitTester.HitTest(Scene, ToScene(position), HitTolerance);
-        ToolTip = key is null ? null : Scene.Texts.FirstOrDefault(text => text.Key == key && text.ToolTip is not null)?.ToolTip;
+        Point position = e.GetPosition(this);
+        if (_reshapeKey is not null)
+        {
+            _hasReshaped = true;
+            ScenePoint pointer = ToScene(position);
+            Execute(ReshapeCommand, new SceneReshape(_reshapeKey, pointer.X, pointer.Y, ReshapePhase.Preview));
+            return;
+        }
+
+        if (_connectKey is not null || _retarget is not null)
+        {
+            _pointer = position;
+            RedrawOverlay();
+            return;
+        }
+
+        if (_dragKey is not null)
+        {
+            UpdateDragPreview(position);
+            return;
+        }
+
+        UpdateHover(position);
+    }
+
+    protected override void OnMouseLeave(MouseEventArgs e)
+    {
+        base.OnMouseLeave(e);
+        if (IsMouseCaptured || _hoverKey is null)
+        {
+            return;
+        }
+
+        _hoverKey = null;
+        Cursor = null;
+        RedrawOverlay();
     }
 
     protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
@@ -306,31 +380,19 @@ public sealed class SceneCanvas : FrameworkElement
         if (_reshapeKey is not null)
         {
             CompleteReshape(e);
-            return;
         }
-
-        if (_connectKey is not null)
+        else if (_connectKey is not null)
         {
             CompleteConnect(e);
-            return;
         }
-
-        if (_dragKey is null)
+        else if (_retarget is not null)
         {
-            return;
+            CompleteRetarget(e);
         }
-
-        string key = _dragKey;
-        Vector delta = e.GetPosition(this) - _dragStart;
-        DragAxis? axis = DragTargets?.TryGetValue(key, out SceneDragTarget? target) == true ? target.Axis : null;
-        ReleaseMouseCapture();
-        e.Handled = true;
-        if (axis is null || delta.Length < DragThreshold)
+        else if (_dragKey is not null)
         {
-            return;
+            CompleteMove(e);
         }
-
-        Execute(MoveCommand, axis == DragAxis.Horizontal ? new SceneMove(key, delta.X, 0) : new SceneMove(key, 0, delta.Y));
     }
 
     protected override void OnLostMouseCapture(MouseEventArgs e)
@@ -340,7 +402,11 @@ public sealed class SceneCanvas : FrameworkElement
         _reshapeKey = null;
         _dragKey = null;
         _connectKey = null;
+        _retarget = null;
+        _markerDrop = null;
+        _dragAnchor = null;
         _dragOffset = default;
+        Cursor = null;
         if (reshapeKey is not null)
         {
             Execute(ReshapeCommand, new SceneReshape(reshapeKey, 0, 0, ReshapePhase.Cancel));
@@ -349,49 +415,14 @@ public sealed class SceneCanvas : FrameworkElement
         RedrawOverlay();
     }
 
-    // The tail handle of the selected marker; null when no marker is selected or the pointer is elsewhere.
-    private string? HandleKeyAt(Point position)
+    private static Cursor CursorFor(DragAxis axis) => axis switch
     {
-        if (Scene is null || SceneArrowSelected() is not SceneArrow arrow)
-        {
-            return null;
-        }
+        DragAxis.Horizontal => Cursors.SizeWE,
+        DragAxis.Vertical => Cursors.SizeNS,
+        _ => Cursors.SizeAll,
+    };
 
-        ScenePoint tail = MarkerReshaper.TailCenter(arrow);
-        ScenePoint pointer = ToScene(position);
-        return Math.Sqrt(Math.Pow(pointer.X - tail.X, 2) + Math.Pow(pointer.Y - tail.Y, 2)) <= HandleHitRadius ? arrow.Key : null;
-    }
-
-    private SceneArrow? SceneArrowSelected()
-    {
-        if (Scene is null || SelectedKeys is not { Count: > 0 } selected)
-        {
-            return null;
-        }
-
-        return Scene.Arrows.FirstOrDefault(arrow => arrow.Outline.Length >= 5 && selected.Contains(arrow.Key));
-    }
-
-    private void CompleteReshape(MouseButtonEventArgs e)
-    {
-        string key = _reshapeKey!;
-        _reshapeKey = null;
-        ScenePoint pointer = ToScene(e.GetPosition(this));
-        ReleaseMouseCapture();
-        Cursor = null;
-        e.Handled = true;
-        Execute(ReshapeCommand, new SceneReshape(key, pointer.X, pointer.Y, _hasReshaped ? ReshapePhase.Commit : ReshapePhase.Cancel));
-    }
-
-    public void RequestRename(string? key)
-    {
-        if (key is null || Scene is null || RenameBounds(Scene, key) is not SceneRect bounds)
-        {
-            return;
-        }
-
-        RenameRequested?.Invoke(this, new SceneRenameRequestedEventArgs(key, new Rect(bounds.Left - Scene.Bounds.Left, bounds.Top - Scene.Bounds.Top, bounds.Width, bounds.Height)));
-    }
+    private static bool IsKind(string key, SceneElementKind kind) => SceneKeys.TryParse(key, out SceneElementRef? element) && element.Kind == kind;
 
     private static SceneRect? RenameBounds(DiagramScene scene, string key)
     {
@@ -413,8 +444,6 @@ public sealed class SceneCanvas : FrameworkElement
             : new SceneRect(((line.From.X + line.To.X) / 2) - (RenameFallbackWidth / 2), ((line.From.Y + line.To.Y) / 2) - (RenameFallbackHeight / 2), RenameFallbackWidth, RenameFallbackHeight);
     }
 
-    private static bool IsLane(string key) => SceneKeys.TryParse(key, out SceneElementRef? element) && element.Kind == SceneElementKind.Lane;
-
     private static void OnVisualInputChanged(DependencyObject owner, DependencyPropertyChangedEventArgs e) =>
         ((SceneCanvas)owner).Redraw();
 
@@ -429,12 +458,137 @@ public sealed class SceneCanvas : FrameworkElement
         }
     }
 
+    private static double Distance(ScenePoint a, ScenePoint b) => Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
+
+    // Converts a size in screen pixels to scene units at the current zoom.
+    private double Px(double pixels) => pixels / Math.Max(Zoom, MinimumZoom);
+
+    private string? HitTest(Point position) => SceneHitTester.HitTest(Scene!, ToScene(position), Px(HitTolerance));
+
     private ScenePoint ToScene(Point position) => new(position.X + Scene!.Bounds.Left, position.Y + Scene.Bounds.Top);
 
-    private string? TargetLaneAt(Point position)
+    private Point FromScene(ScenePoint point) => new(point.X - Scene!.Bounds.Left, point.Y - Scene.Bounds.Top);
+
+    private void StartHandleDrag(CanvasHandle handle, Point position)
+    {
+        Cursor = Cursors.Hand;
+        if (handle.Kind == HandleKind.MarkerTail)
+        {
+            _reshapeKey = handle.Key;
+            _hasReshaped = false;
+            return;
+        }
+
+        _retarget = handle;
+        _dragStart = position;
+        _pointer = position;
+    }
+
+    private void UpdateHover(Point position)
+    {
+        CanvasHandle? handle = HandleAt(position);
+        string? key = handle is null ? HitTest(position) : null;
+        Cursor = handle is not null ? Cursors.Hand
+            : key is null ? null
+            : IsKind(key, SceneElementKind.Lane) && ConnectCommand is not null ? Cursors.Cross
+            : DragTargets?.TryGetValue(key, out SceneDragTarget? target) == true ? CursorFor(target.Axis)
+            : Cursors.Hand;
+        ToolTip = key is null ? null : Scene!.Texts.FirstOrDefault(text => text.Key == key && text.ToolTip is not null)?.ToolTip;
+        if (key != _hoverKey)
+        {
+            _hoverKey = key;
+            RedrawOverlay();
+        }
+    }
+
+    private void UpdateDragPreview(Point position)
+    {
+        if (DragTargets is not { } targets || !targets.TryGetValue(_dragKey!, out SceneDragTarget? target))
+        {
+            return;
+        }
+
+        Vector delta = position - _dragStart;
+        Vector offset;
+        if (target.Axis == DragAxis.Both)
+        {
+            _markerDrop = _dragAnchor is ScenePoint anchor && delta.Length >= Px(DragThreshold)
+                ? MarkerDropResolver.Resolve(Scene!, new ScenePoint(anchor.X + delta.X, anchor.Y + delta.Y), HorizontalSnap, VerticalSnap)
+                : null;
+            offset = _markerDrop is not null && _dragAnchor is ScenePoint origin
+                ? new Vector(_markerDrop.Anchor.X - origin.X, _markerDrop.Anchor.Y - origin.Y)
+                : default;
+        }
+        else
+        {
+            offset = target.Axis == DragAxis.Horizontal
+                ? new Vector(DragPlanner.SnapDistance(delta.X, HorizontalSnap), 0)
+                : new Vector(0, DragPlanner.SnapDistance(delta.Y, VerticalSnap));
+        }
+
+        if (offset != _dragOffset)
+        {
+            _dragOffset = offset;
+            RedrawOverlay();
+        }
+    }
+
+    // Grab points for the selection: a marker's tail reshapes it, either end of a pull or merge reconnects it.
+    private List<CanvasHandle> Handles()
+    {
+        List<CanvasHandle> handles = [];
+        if (Scene is null || SelectedKeys is not { Count: > 0 } selected)
+        {
+            return handles;
+        }
+
+        foreach (SceneArrow arrow in Scene.Arrows.Where(arrow => arrow.Outline.Length >= 5 && selected.Contains(arrow.Key)))
+        {
+            handles.Add(new CanvasHandle(HandleKind.MarkerTail, arrow.Key, MarkerReshaper.TailCenter(arrow), null));
+        }
+
+        if (RetargetCommand is null)
+        {
+            return handles;
+        }
+
+        foreach (SceneLine line in Scene.Lines.Where(line => selected.Contains(line.Key) && IsKind(line.Key, SceneElementKind.Connector)))
+        {
+            handles.Add(new CanvasHandle(HandleKind.ConnectorFrom, line.Key, line.From, line.To));
+            handles.Add(new CanvasHandle(HandleKind.ConnectorTo, line.Key, line.To, line.From));
+        }
+
+        return handles;
+    }
+
+    private CanvasHandle? HandleAt(Point position)
+    {
+        ScenePoint pointer = ToScene(position);
+        double radius = Px(HandleHitRadius);
+        return Handles()
+            .Where(handle => Distance(handle.Center, pointer) <= radius)
+            .OrderBy(handle => Distance(handle.Center, pointer))
+            .FirstOrDefault();
+    }
+
+    private string? TargetLaneAt(Point position, string? excludedKey)
     {
         string? key = SceneHitTester.HitLane(Scene!, ToScene(position), VerticalSnap / 2);
-        return key is null || key == _connectKey ? null : key;
+        return key is null || key == excludedKey ? null : key;
+    }
+
+    // The lane at the end of the connector that stays put, so the moving end cannot be dropped onto it.
+    private string? FixedLaneKey(CanvasHandle handle) =>
+        handle.Other is ScenePoint other ? SceneHitTester.HitLane(Scene!, other, Px(1)) : null;
+
+    private void CompleteReshape(MouseButtonEventArgs e)
+    {
+        string key = _reshapeKey!;
+        _reshapeKey = null;
+        ScenePoint pointer = ToScene(e.GetPosition(this));
+        ReleaseMouseCapture();
+        e.Handled = true;
+        Execute(ReshapeCommand, new SceneReshape(key, pointer.X, pointer.Y, _hasReshaped ? ReshapePhase.Commit : ReshapePhase.Cancel));
     }
 
     private void CompleteConnect(MouseButtonEventArgs e)
@@ -442,13 +596,49 @@ public sealed class SceneCanvas : FrameworkElement
         string fromKey = _connectKey!;
         Point position = e.GetPosition(this);
         double distance = (position - _dragStart).Length;
-        string? toKey = Scene is null ? null : TargetLaneAt(position);
+        string? toKey = TargetLaneAt(position, fromKey);
         ReleaseMouseCapture();
         e.Handled = true;
-        if (toKey is not null && distance >= DragThreshold)
+        if (toKey is not null && distance >= Px(DragThreshold))
         {
             Execute(ConnectCommand, new SceneConnect(fromKey, toKey, ToScene(position).X, Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)));
         }
+    }
+
+    private void CompleteRetarget(MouseButtonEventArgs e)
+    {
+        CanvasHandle handle = _retarget!;
+        Point position = e.GetPosition(this);
+        double distance = (position - _dragStart).Length;
+        string? laneKey = TargetLaneAt(position, FixedLaneKey(handle));
+        ReleaseMouseCapture();
+        e.Handled = true;
+        if (laneKey is not null && distance >= Px(DragThreshold))
+        {
+            ConnectorEnd end = handle.Kind == HandleKind.ConnectorFrom ? ConnectorEnd.From : ConnectorEnd.To;
+            Execute(RetargetCommand, new SceneRetarget(handle.Key, end, laneKey, ToScene(position).X));
+        }
+    }
+
+    private void CompleteMove(MouseButtonEventArgs e)
+    {
+        string key = _dragKey!;
+        Vector delta = e.GetPosition(this) - _dragStart;
+        DragAxis? axis = DragTargets?.TryGetValue(key, out SceneDragTarget? target) == true ? target.Axis : null;
+        ReleaseMouseCapture();
+        e.Handled = true;
+        if (axis is null || delta.Length < Px(DragThreshold))
+        {
+            return;
+        }
+
+        SceneMove move = axis switch
+        {
+            DragAxis.Horizontal => new SceneMove(key, delta.X, 0),
+            DragAxis.Vertical => new SceneMove(key, 0, delta.Y),
+            _ => new SceneMove(key, delta.X, delta.Y),
+        };
+        Execute(MoveCommand, move);
     }
 
     private void Redraw()
@@ -465,6 +655,9 @@ public sealed class SceneCanvas : FrameworkElement
         RedrawOverlay();
     }
 
+    private Pen HighlightPen(Brush brush) =>
+        new(brush, Px(HighlightThickness)) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+
     private void RedrawOverlay()
     {
         using DrawingContext context = _overlay.RenderOpen();
@@ -474,33 +667,60 @@ public sealed class SceneCanvas : FrameworkElement
         }
 
         context.PushTransform(new TranslateTransform(-Scene.Bounds.Left, -Scene.Bounds.Top));
-        Pen pen = new(HighlightBrush, HighlightThickness) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+        DrawHover(context);
+        Pen pen = HighlightPen(HighlightBrush);
         DrawHighlight(context, pen, SelectedKeys ?? [], default);
         if (_dragKey is not null && _dragOffset != default && DragTargets?.TryGetValue(_dragKey, out SceneDragTarget? target) == true)
         {
+            if (_markerDrop is not null && ConnectPreviewBrush is not null)
+            {
+                DrawHighlight(context, HighlightPen(ConnectPreviewBrush), [_markerDrop.TargetKey], default);
+            }
+
             DrawHighlight(context, pen, target.Keys, _dragOffset);
         }
 
         DrawConnectPreview(context);
-        DrawHandle(context);
+        DrawRetargetPreview(context);
+        DrawHandles(context);
     }
 
-    private void DrawHandle(DrawingContext context)
+    private void DrawHover(DrawingContext context)
     {
-        if (SceneArrowSelected() is not SceneArrow arrow || Palette is null)
+        if (_hoverKey is null || HighlightBrush is null || SelectedKeys?.Contains(_hoverKey) == true)
         {
             return;
         }
 
+        Brush brush = HighlightBrush.CloneCurrentValue();
+        brush.Opacity = HoverOpacity;
+        brush.Freeze();
+        DrawHighlight(context, HighlightPen(brush), SceneSelection.KeysOf(SceneSelection.FromKey(_hoverKey)), default);
+    }
+
+    private void DrawHandles(DrawingContext context)
+    {
+        if (Palette is null)
+        {
+            return;
+        }
+
+        Pen ring = new(new SolidColorBrush(Palette.BackgroundColor), Px(HandleRingThickness));
+        double radius = Px(HandleRadius);
+        foreach (CanvasHandle handle in Handles())
+        {
+            context.DrawEllipse(HighlightBrush, ring, new Point(handle.Center.X, handle.Center.Y), radius, radius);
+        }
+
+        if (_reshapeKey is not null && Scene!.Arrows.FirstOrDefault(arrow => arrow.Key == _reshapeKey && arrow.Outline.Length >= 5) is SceneArrow reshaped)
+        {
+            DrawReadout(context, reshaped);
+        }
+    }
+
+    private void DrawReadout(DrawingContext context, SceneArrow arrow)
+    {
         ScenePoint tailPoint = MarkerReshaper.TailCenter(arrow);
-        Point tail = new(tailPoint.X, tailPoint.Y);
-        Pen ring = new(new SolidColorBrush(Palette.BackgroundColor), HandleRingThickness);
-        context.DrawEllipse(HighlightBrush, ring, tail, HandleRadius, HandleRadius);
-        if (_reshapeKey is null)
-        {
-            return;
-        }
-
         double dx = arrow.Outline[0].X - tailPoint.X;
         double dy = arrow.Outline[0].Y - tailPoint.Y;
         double angle = MarkerDirection.Normalize(Math.Atan2(dy, dx) * 180 / Math.PI);
@@ -509,36 +729,56 @@ public sealed class SceneCanvas : FrameworkElement
             readout,
             CultureInfo.CurrentCulture,
             FlowDirection.LeftToRight,
-            new Typeface(Palette.FontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
-            ReadoutFontSize,
+            new Typeface(Palette!.FontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+            Px(ReadoutFontSize),
             new SolidColorBrush(Palette.TextColor),
             VisualTreeHelper.GetDpi(this).PixelsPerDip);
-        Point origin = new(tail.X + ReadoutOffset, tail.Y - ReadoutOffset - text.Height);
+        double padding = Px(ReadoutPadding);
+        Point origin = new(tailPoint.X + Px(ReadoutOffset), tailPoint.Y - Px(ReadoutOffset) - text.Height);
         context.DrawRoundedRectangle(
             new SolidColorBrush(Palette.BackgroundColor),
-            new Pen(HighlightBrush, 1),
-            new Rect(origin.X - ReadoutPadding, origin.Y - ReadoutPadding, text.Width + (2 * ReadoutPadding), text.Height + (2 * ReadoutPadding)),
-            2,
-            2);
+            new Pen(HighlightBrush, Px(1)),
+            new Rect(origin.X - padding, origin.Y - padding, text.Width + (2 * padding), text.Height + (2 * padding)),
+            Px(2),
+            Px(2));
         context.DrawText(text, origin);
     }
 
     private void DrawConnectPreview(DrawingContext context)
     {
-        if (_connectKey is null || ConnectPreviewBrush is null || (_connectCurrent - _dragStart).Length < DragThreshold)
+        if (_connectKey is null)
         {
             return;
         }
 
-        string? targetKey = TargetLaneAt(_connectCurrent);
-        if (targetKey is not null)
+        DrawLanePreview(context, _dragStart, TargetLaneAt(_pointer, _connectKey));
+    }
+
+    private void DrawRetargetPreview(DrawingContext context)
+    {
+        if (_retarget?.Other is not ScenePoint fixedEnd)
         {
-            DrawHighlight(context, new Pen(ConnectPreviewBrush, HighlightThickness) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round }, [targetKey], default);
+            return;
         }
 
-        Pen preview = new(ConnectPreviewBrush, ConnectPreviewThickness) { DashStyle = DashStyles.Dash, EndLineCap = PenLineCap.Round };
-        Point origin = new(Scene!.Bounds.Left, Scene.Bounds.Top);
-        context.DrawLine(preview, _dragStart + (Vector)origin, _connectCurrent + (Vector)origin);
+        DrawLanePreview(context, FromScene(fixedEnd), TargetLaneAt(_pointer, FixedLaneKey(_retarget)));
+    }
+
+    private void DrawLanePreview(DrawingContext context, Point origin, string? targetKey)
+    {
+        if (ConnectPreviewBrush is null || (_pointer - _dragStart).Length < Px(DragThreshold))
+        {
+            return;
+        }
+
+        if (targetKey is not null)
+        {
+            DrawHighlight(context, HighlightPen(ConnectPreviewBrush), [targetKey], default);
+        }
+
+        Pen preview = new(ConnectPreviewBrush, Px(ConnectPreviewThickness)) { DashStyle = DashStyles.Dash, EndLineCap = PenLineCap.Round };
+        Vector shift = new(Scene!.Bounds.Left, Scene.Bounds.Top);
+        context.DrawLine(preview, origin + shift, _pointer + shift);
     }
 
     private void DrawHighlight(DrawingContext context, Pen pen, IReadOnlyCollection<string> keys, Vector offset)
@@ -580,4 +820,7 @@ public sealed class SceneCanvas : FrameworkElement
 
         context.Pop();
     }
+
+    // Other is the opposite end of a pull or merge, which stays put while this end is dragged.
+    private sealed record CanvasHandle(HandleKind Kind, string Key, ScenePoint Center, ScenePoint? Other);
 }

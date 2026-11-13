@@ -6,6 +6,13 @@ public enum DragAxis
 {
     Horizontal,
     Vertical,
+    Both,
+}
+
+public enum ConnectorEnd
+{
+    From,
+    To,
 }
 
 // What dragging an element moves: along which axis, and which scene elements move with it.
@@ -16,6 +23,9 @@ public sealed record SceneMove(string Key, double DeltaX, double DeltaY);
 
 // A lane dragged onto another lane: the connector runs from the first to the second at the scene x where it was dropped.
 public sealed record SceneConnect(string FromKey, string ToKey, double X, bool IsPull);
+
+// One end of a pull or merge dragged onto a lane; the From end also takes the step at the scene x where it was dropped.
+public sealed record SceneRetarget(string ConnectorKey, ConnectorEnd End, string LaneKey, double X);
 
 public sealed record SceneRename(string Key, string Text);
 

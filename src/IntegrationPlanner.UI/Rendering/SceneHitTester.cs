@@ -38,12 +38,19 @@ public static class SceneHitTester
     }
 
     // The lane line nearest to the point, if any lies within the tolerance.
-    public static string? HitLane(DiagramScene scene, ScenePoint point, double tolerance)
+    public static string? HitLane(DiagramScene scene, ScenePoint point, double tolerance) =>
+        HitLine(scene, point, tolerance, SceneElementKind.Lane);
+
+    // The pull or merge line nearest to the point, if any lies within the tolerance.
+    public static string? HitConnector(DiagramScene scene, ScenePoint point, double tolerance) =>
+        HitLine(scene, point, tolerance, SceneElementKind.Connector);
+
+    private static string? HitLine(DiagramScene scene, ScenePoint point, double tolerance, SceneElementKind kind)
     {
         ArgumentNullException.ThrowIfNull(scene);
         ArgumentOutOfRangeException.ThrowIfNegative(tolerance);
         return scene.Lines
-            .Where(line => SceneKeys.TryParse(line.Key, out SceneElementRef? element) && element.Kind == SceneElementKind.Lane)
+            .Where(line => SceneKeys.TryParse(line.Key, out SceneElementRef? element) && element.Kind == kind)
             .Select(line => (line.Key, Distance: DistanceToSegment(point, line.From, line.To)))
             .Where(candidate => candidate.Distance <= tolerance)
             .OrderBy(candidate => candidate.Distance)

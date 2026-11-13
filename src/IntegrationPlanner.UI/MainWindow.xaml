@@ -53,6 +53,12 @@
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>
+                <Border Style="{StaticResource ToolbarSeparatorStyle}" />
+                <Button Style="{StaticResource ToolbarTextButtonStyle}" Content="{loc:Loc ToolbarAddBranch}" Command="{Binding AddBranchCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarAddBranchToolTip}" />
+                <Button Style="{StaticResource ToolbarTextButtonStyle}" Content="{loc:Loc ToolbarAddMarker}" Command="{Binding AddMarkerCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarAddMarkerToolTip}" />
+                <Button Style="{StaticResource ToolbarTextButtonStyle}" Content="{loc:Loc ToolbarAddMerge}" Command="{Binding AddMergeCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarAddMergeToolTip}" />
+                <Button Style="{StaticResource ToolbarTextButtonStyle}" Content="{loc:Loc ToolbarAddPull}" Command="{Binding AddPullCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarAddPullToolTip}" />
+                <Button Style="{StaticResource ChromeButtonStyle}" Content="&#xE74D;" Command="{Binding DeleteSelectionCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarDeleteToolTip}" />
             </StackPanel>
             <TextBlock Grid.Column="1" Style="{StaticResource TitleTextStyle}" Text="{Binding WindowTitle, Mode=OneWay}" />
             <Border Grid.Column="2" Width="140" />
@@ -114,14 +120,15 @@
         </Border>
 
         <Border Style="{StaticResource CanvasPanelStyle}">
-        <Grid x:Name="CanvasHost">
+        <Grid x:Name="CanvasHost" ContextMenuOpening="OnCanvasContextMenuOpening">
             <Grid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="{loc:Loc ContextRename}" Click="OnRenameSelected" />
+                    <Separator />
+                    <MenuItem Header="{loc:Loc ContextAddMarkerHere}" Command="{Binding AddMarkerHereCommand, Mode=OneTime}" />
+                    <MenuItem Header="{loc:Loc ContextAddMergeHere}" Command="{Binding AddMergeHereCommand, Mode=OneTime}" />
+                    <MenuItem Header="{loc:Loc ContextAddPullHere}" Command="{Binding AddPullHereCommand, Mode=OneTime}" />
                     <MenuItem Header="{loc:Loc ToolbarAddBranch}" Command="{Binding AddBranchCommand, Mode=OneTime}" />
-                    <MenuItem Header="{loc:Loc ToolbarAddMarker}" Command="{Binding AddMarkerCommand, Mode=OneTime}" />
-                    <MenuItem Header="{loc:Loc ToolbarAddPull}" Command="{Binding AddPullCommand, Mode=OneTime}" />
-                    <MenuItem Header="{loc:Loc ToolbarAddMerge}" Command="{Binding AddMergeCommand, Mode=OneTime}" />
                     <Separator />
                     <MenuItem Header="{loc:Loc ToolbarDelete}" Command="{Binding DeleteSelectionCommand, Mode=OneTime}" />
                 </ContextMenu>
@@ -137,8 +144,12 @@
                                        SelectCommand="{Binding SelectElementCommand, Mode=OneTime}"
                                        MoveCommand="{Binding MoveElementCommand, Mode=OneTime}"
                                        ReshapeCommand="{Binding ReshapeMarkerCommand, Mode=OneTime}"
+                                       RetargetCommand="{Binding RetargetConnectorCommand, Mode=OneTime}"
+                                       ContextPoint="{Binding ContextPoint, Mode=TwoWay}"
                                        SelectedKeys="{Binding SelectedKeys, Mode=OneWay}"
                                        DragTargets="{Binding DragTargets, Mode=OneWay}"
+                                       Zoom="{Binding Zoom, Mode=OneWay}"
+                                       MarkerGap="{Binding MarkerGap, Mode=OneTime}"
                                        HorizontalSnap="{Binding HorizontalSnap, Mode=OneTime}"
                                        VerticalSnap="{Binding VerticalSnap, Mode=OneTime}">
                     <rendering:SceneCanvas.LayoutTransform>

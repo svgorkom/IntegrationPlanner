@@ -49,7 +49,10 @@ public static class PlanItemFactory
         return new CompositePlanCommand(commands);
     }
 
-    public static Connector? NewConnector(Plan plan, Scenario scenario, ConnectorKind kind, BranchId? selectedBranchId)
+    public static Connector? NewConnector(Plan plan, Scenario scenario, ConnectorKind kind, BranchId? selectedBranchId) =>
+        NewConnector(plan, scenario, kind, selectedBranchId, null);
+
+    public static Connector? NewConnector(Plan plan, Scenario scenario, ConnectorKind kind, BranchId? selectedBranchId, int? step)
     {
         ArgumentNullException.ThrowIfNull(plan);
         ArgumentNullException.ThrowIfNull(scenario);
@@ -61,8 +64,14 @@ public static class PlanItemFactory
 
         BranchId from = selectedBranchId is BranchId selected && lanes.Contains(selected) ? selected : lanes[0];
         BranchId to = MainlineLane(plan, lanes, from) ?? NeighbourLane(lanes, from);
-        int step = Math.Clamp(DefaultConnectorStep, 0, Math.Max(scenario.StepCount - 1, 0));
-        return new Connector(ConnectorId.New(), kind, from, to, step, null, ProgressState.Planned);
+        int connectorStep = Math.Clamp(step ?? DefaultConnectorStep, 0, Math.Max(scenario.StepCount - 1, 0));
+        return new Connector(ConnectorId.New(), kind, from, to, connectorStep, null, ProgressState.Planned);
+    }
+
+    public static Marker NewMarker(MarkerAnchor anchor)
+    {
+        ArgumentNullException.ThrowIfNull(anchor);
+        return new Marker(MarkerId.New(), MarkerKind.Custom, UiText.DefaultMarkerLabel, anchor, MarkerDirection.FromTop, ProgressState.Planned);
     }
 
     public static Marker? NewMarker(Scenario scenario, EditorSelection? selection)
@@ -75,9 +84,7 @@ public static class PlanItemFactory
             MarkerSelection marker when scenario.Markers.Find(item => item.Id == marker.MarkerId) is { } selected => NextTo(scenario, selected.Anchor),
             _ => OrderedLaneBranches(scenario) is [BranchId first, ..] ? new BranchStepAnchor(first, 0) : null,
         };
-        return anchor is null
-            ? null
-            : new Marker(MarkerId.New(), MarkerKind.Custom, UiText.DefaultMarkerLabel, anchor, MarkerDirection.FromTop, ProgressState.Planned);
+        return anchor is null ? null : NewMarker(anchor);
     }
 
     // A new marker next to the selected one stays on its branch, one step further so it does not hide it.

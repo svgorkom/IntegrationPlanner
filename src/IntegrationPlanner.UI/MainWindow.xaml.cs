@@ -49,6 +49,7 @@ public partial class MainWindow : Window
         DataContext = viewModel;
         PreviewMouseDown += OnPreviewMouseDown;
         PreviewKeyDown += OnPreviewKeyDown;
+        KeyDown += OnKeyDown;
         Closing += OnClosing;
         SourceInitialized += (_, _) => ApplyBackdrop();
         _themeService.Changed += (_, _) => ApplyBackdrop();
@@ -207,6 +208,35 @@ public partial class MainWindow : Window
         if (isSingleLineEnter || Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
         {
             CommitFocusedTextBox();
+        }
+    }
+
+    // Esc abandons a drag on the canvas, or otherwise clears the selection. Controls that use Esc themselves,
+    // such as the inline editor and open drop-downs, handle it before it bubbles up to here.
+    private void OnKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape || e.Handled || Keyboard.FocusedElement is TextBox)
+        {
+            return;
+        }
+
+        if (Diagram.CancelInteraction())
+        {
+            e.Handled = true;
+        }
+        else if (_viewModel.SelectedKeys.Count > 0)
+        {
+            _viewModel.SelectElementCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
+    // A menu opened outside the diagram has no point to place new items at.
+    private void OnCanvasContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        if (!Diagram.IsMouseOver)
+        {
+            _viewModel.ContextPoint = null;
         }
     }
 

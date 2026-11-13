@@ -280,7 +280,7 @@
     <value>Marker</value>
   </data>
   <data name="PropertiesDragHint" xml:space="preserve">
-    <value>Drag lanes up or down, and pulls, merges and markers left or right.</value>
+    <value>Drag from one lane line to another to add a merge (hold Shift for a pull). Drag a branch name to reorder lanes. Drag pulls, merges and markers to move them; drag the round handles to reshape a marker or reconnect a pull or merge. Double-click to rename, Esc to cancel.</value>
   </data>
   <data name="FieldTitle" xml:space="preserve">
     <value>Title</value>
@@ -362,6 +362,15 @@
   </data>
   <data name="ContextRename" xml:space="preserve">
     <value>Rename</value>
+  </data>
+  <data name="ContextAddMarkerHere" xml:space="preserve">
+    <value>Add marker here</value>
+  </data>
+  <data name="ContextAddMergeHere" xml:space="preserve">
+    <value>Add merge from here</value>
+  </data>
+  <data name="ContextAddPullHere" xml:space="preserve">
+    <value>Add pull from here</value>
   </data>
   <data name="ToolbarMoreToolTip" xml:space="preserve">
     <value>More actions</value>

@@ -75,4 +75,17 @@ public sealed class SceneHitTesterTests
 
         Assert.Null(key);
     }
+
+    [Fact]
+    public void HitConnector_FindsOnlyPullsAndMerges()
+    {
+        const string connectorKey = "connector/pull";
+        DiagramScene scene = Scene with
+        {
+            Lines = [.. Scene.Lines, new SceneLine(connectorKey, new ScenePoint(200, 100), new ScenePoint(220, 170), LineStyle.Connector)],
+        };
+
+        Assert.Equal(connectorKey, SceneHitTester.HitConnector(scene, new ScenePoint(212, 135), Tolerance));
+        Assert.Null(SceneHitTester.HitConnector(scene, new ScenePoint(100, 100), Tolerance));
+    }
 }

@@ -32,11 +32,17 @@ public sealed partial class MainViewModel
     [ObservableProperty]
     private IReadOnlyDictionary<string, SceneDragTarget> _dragTargets = new Dictionary<string, SceneDragTarget>();
 
+    // Scene point where the canvas context menu was opened; the "here" actions place new items at it.
+    [ObservableProperty]
+    private ScenePoint? _contextPoint;
+
     public ObservableCollection<BranchItem> Branches { get; } = [];
 
     public double HorizontalSnap => _layoutOptions.StepWidth;
 
     public double VerticalSnap => _layoutOptions.LaneSpacing;
+
+    public double MarkerGap => _layoutOptions.MarkerGap;
 
     private Scenario? CurrentScenario =>
         _editor is not null && SelectedScenario is not null ? _editor.Current.Scenarios.Find(scenario => scenario.Id == SelectedScenario.Id) : null;
@@ -118,6 +124,28 @@ public sealed partial class MainViewModel
         SetSelection(new MarkerSelection(marker.Id));
     }
 
+    [RelayCommand(CanExecute = nameof(HasLanes))]
+    private void AddMarkerHere()
+    {
+        Scenario scenario = CurrentScenario!;
+        MarkerAnchor? anchor = ContextDrop() is MarkerDrop drop ? DragPlanner.AnchorFor(scenario, drop, _layoutOptions.StepWidth) : null;
+        if (anchor is null)
+        {
+            AddMarker();
+            return;
+        }
+
+        Marker marker = PlanItemFactory.NewMarker(anchor);
+        _editor!.Execute(new AddMarkerCommand(scenario.Id, marker));
+        SetSelection(new MarkerSelection(marker.Id));
+    }
+
+    [RelayCommand(CanExecute = nameof(HasLanes))]
+    private void AddPullHere() => AddConnectorHere(ConnectorKind.Pull);
+
+    [RelayCommand(CanExecute = nameof(HasLanes))]
+    private void AddMergeHere() => AddConnectorHere(ConnectorKind.Merge);
+
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void DeleteSelection()
     {
@@ -145,7 +173,22 @@ public sealed partial class MainViewModel
             return;
         }
 
-        IPlanCommand? command = DragPlanner.CommandFor(scenario, move, _layoutOptions);
+        IPlanCommand? command = DragPlanner.CommandFor(scenario, Scene, move, _layoutOptions);
+        if (command is not null)
+        {
+            _editor!.Execute(command);
+        }
+    }
+
+    [RelayCommand]
+    private void RetargetConnector(SceneRetarget? retarget)
+    {
+        if (retarget is null || CurrentScenario is not Scenario scenario)
+        {
+            return;
+        }
+
+        IPlanCommand? command = DragPlanner.RetargetCommand(scenario, retarget, _layoutOptions);
         if (command is not null)
         {
             _editor!.Execute(command);
@@ -205,7 +248,7 @@ public sealed partial class MainViewModel
             return;
         }
 
-        int step = Math.Clamp((int)Math.Round(connect.X / _layoutOptions.StepWidth), 0, Math.Max(0, scenario.StepCount - 1));
+        int step = DragPlanner.StepAt(scenario, connect.X, _layoutOptions.StepWidth);
         ConnectorKind kind = connect.IsPull ? ConnectorKind.Pull : ConnectorKind.Merge;
         Connector connector = new(ConnectorId.New(), kind, from.BranchId, to.BranchId, step, null, ProgressState.Planned);
         _editor!.Execute(new AddConnectorCommand(scenario.Id, connector));
@@ -275,6 +318,31 @@ public sealed partial class MainViewModel
         _editor.Execute(new AddConnectorCommand(scenario.Id, connector));
         SetSelection(new ConnectorSelection(connector.Id));
     }
+
+    // Starts on the lane under the context point at its step; anywhere else behaves like the toolbar action.
+    private void AddConnectorHere(ConnectorKind kind)
+    {
+        Scenario scenario = CurrentScenario!;
+        if (ContextDrop() is not MarkerDrop drop || SceneSelection.FromKey(drop.TargetKey) is not BranchSelection lane)
+        {
+            AddConnector(kind);
+            return;
+        }
+
+        int step = DragPlanner.StepAt(scenario, drop.Anchor.X, _layoutOptions.StepWidth);
+        Connector? connector = PlanItemFactory.NewConnector(_editor!.Current, scenario, kind, lane.BranchId, step);
+        if (connector is null)
+        {
+            return;
+        }
+
+        _editor.Execute(new AddConnectorCommand(scenario.Id, connector));
+        SetSelection(new ConnectorSelection(connector.Id));
+    }
+
+    private MarkerDrop? ContextDrop() => Scene is not null && ContextPoint is ScenePoint point
+        ? MarkerDropResolver.Resolve(Scene, point, _layoutOptions.StepWidth, _layoutOptions.LaneSpacing)
+        : null;
 
     partial void OnSelectedBranchChanged(BranchItem? value)
     {
@@ -382,7 +450,8 @@ public sealed partial class MainViewModel
         foreach (IRelayCommand command in new IRelayCommand[]
         {
             SaveCommand, SaveAsCommand, UndoCommand, RedoCommand, AddScenarioCommand, DuplicateScenarioCommand, DeleteScenarioCommand,
-            AddBranchCommand, AddPullCommand, AddMergeCommand, AddMarkerCommand, DeleteSelectionCommand,
+            AddBranchCommand, AddPullCommand, AddMergeCommand, AddMarkerCommand, AddPullHereCommand, AddMergeHereCommand, AddMarkerHereCommand,
+            DeleteSelectionCommand,
         })
         {
             command.NotifyCanExecuteChanged();
