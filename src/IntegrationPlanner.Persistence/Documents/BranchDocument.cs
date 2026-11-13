@@ -11,4 +11,6 @@ internal sealed class BranchDocument
     public bool IsMainline { get; set; }
 
     public bool IsCancelled { get; set; }
+
+    public string? JiraKey { get; set; }
 }

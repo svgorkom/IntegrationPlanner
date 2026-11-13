@@ -18,7 +18,7 @@ Reference diagram: `docs/reference/branching-strategy-scenario3.png`.
 | D10 | Editing via forms/property panel **and** drag on canvas (reorder steps and lanes). |
 | D11 | Sharing: PNG + SVG export and copy-to-clipboard. |
 | D12 | No audit log; undo/redo + git history of the plan file suffice. |
-| D13 | Jira/PR integration deferred to a later extension. |
+| D13 | Jira Data Center integration (PAT, one-way import of tickets into branches) lives in `IntegrationPlanner.Jira`; two-way sync and PR integration deferred. |
 | D14 | UI English only; all strings in `Strings.resx`. |
 | D15 | WPF on .NET 10. Old `.github`/`.claude` scaffolding removed. |
 | D16 | (P3, user) Canvas drag: left-drag on an item moves it; left-drag on empty space pans. Lanes move vertically (`Order`); connectors and branch-anchored markers move horizontally (`Step`). Nothing else is draggable. |

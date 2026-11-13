@@ -2,6 +2,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using IntegrationPlanner.Core.Integrity;
 using IntegrationPlanner.Layout;
+using IntegrationPlanner.Layout.Scene;
 using IntegrationPlanner.Persistence;
 using IntegrationPlanner.UI.Export;
 using IntegrationPlanner.UI.Localization;
@@ -253,6 +254,30 @@ public sealed class MainViewModelTests
         viewModel.ResetZoomCommand.Execute(null);
 
         Assert.Equal(1.0, viewModel.Zoom);
+    }
+
+    [Fact]
+    public void FitToWindow_ScalesTheSceneToTheLimitingViewportSide()
+    {
+        MainViewModel viewModel = CreateViewModel();
+        viewModel.Scene = new DiagramScene(new SceneRect(0, 0, 100, 50), [], [], []);
+
+        viewModel.UpdateViewport(432, 1000);
+
+        Assert.Equal(4.0, viewModel.Zoom);
+    }
+
+    [Fact]
+    public void FitMode_FollowsTheViewportUntilTheUserZooms()
+    {
+        MainViewModel viewModel = CreateViewModel();
+        viewModel.Scene = new DiagramScene(new SceneRect(0, 0, 400, 200), [], [], []);
+        viewModel.UpdateViewport(832, 832);
+
+        viewModel.ZoomOutCommand.Execute(null);
+        viewModel.UpdateViewport(1632, 1632);
+
+        Assert.Equal(2.0 / MainViewModel.ZoomFactor, viewModel.Zoom);
     }
 
     private MainViewModel CreateViewModel() =>

@@ -90,6 +90,32 @@ public static class UiText
 
     public static string ChoiceConnectorFormat => Get(nameof(ChoiceConnectorFormat));
 
+    public static string JiraConnectedFormat => Get(nameof(JiraConnectedFormat));
+
+    public static string JiraSettingsIncomplete => Get(nameof(JiraSettingsIncomplete));
+
+    public static string JiraMainlineRequired => Get(nameof(JiraMainlineRequired));
+
+    public static string JiraFailureUnreachable => Get(nameof(JiraFailureUnreachable));
+
+    public static string JiraFailureUnauthorized => Get(nameof(JiraFailureUnauthorized));
+
+    public static string JiraFailureNotFound => Get(nameof(JiraFailureNotFound));
+
+    public static string JiraFailureOther => Get(nameof(JiraFailureOther));
+
+    public static string JiraOpenPageFailed => Get(nameof(JiraOpenPageFailed));
+
+    public static string JiraNoResults => Get(nameof(JiraNoResults));
+
+    public static string JiraDuplicateTicketFormat => Get(nameof(JiraDuplicateTicketFormat));
+
+    public static string JiraDuplicateNameFormat => Get(nameof(JiraDuplicateNameFormat));
+
+    public static string ErrorJiraSettingsLoad => Get(nameof(ErrorJiraSettingsLoad));
+
+    public static string ErrorJiraSettingsSave => Get(nameof(ErrorJiraSettingsSave));
+
     public static string Get(string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);

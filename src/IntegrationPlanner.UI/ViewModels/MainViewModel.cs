@@ -21,6 +21,7 @@ public sealed partial class MainViewModel : ObservableObject
     public const double MinimumZoom = 0.25;
     public const double MaximumZoom = 4.0;
     public const double ZoomFactor = 1.25;
+    private const double FitMargin = 32;
     private const string PlanFileExtension = ".iplan.json";
 
     private readonly IPlanFileStore _planFileStore;
@@ -50,6 +51,10 @@ public sealed partial class MainViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(ZoomInCommand), nameof(ZoomOutCommand))]
     private double _zoom = 1.0;
 
+    private bool _isFitToWindow = true;
+    private double _viewportWidth;
+    private double _viewportHeight;
+
     public MainViewModel(
         IPlanFileStore planFileStore,
         IDiagramLayoutEngine layoutEngine,
@@ -78,6 +83,8 @@ public sealed partial class MainViewModel : ObservableObject
     public ObservableCollection<ScenarioItem> Scenarios { get; } = [];
 
     public bool HasPlan => _editor is not null;
+
+    public Func<string, Task>? TicketOpener { get; set; }
 
     public bool HasUnsavedChanges => _editor is not null && !ReferenceEquals(_editor.Current, _savedPlan);
 
@@ -163,13 +170,59 @@ public sealed partial class MainViewModel : ObservableObject
     private Task SaveAsAsync(CancellationToken cancellationToken) => SaveDocumentAsync(null, cancellationToken);
 
     [RelayCommand(CanExecute = nameof(CanZoomIn))]
-    private void ZoomIn() => Zoom = Math.Min(MaximumZoom, Zoom * ZoomFactor);
+    private void ZoomIn()
+    {
+        _isFitToWindow = false;
+        Zoom = Math.Min(MaximumZoom, Zoom * ZoomFactor);
+    }
 
     [RelayCommand(CanExecute = nameof(CanZoomOut))]
-    private void ZoomOut() => Zoom = Math.Max(MinimumZoom, Zoom / ZoomFactor);
+    private void ZoomOut()
+    {
+        _isFitToWindow = false;
+        Zoom = Math.Max(MinimumZoom, Zoom / ZoomFactor);
+    }
 
     [RelayCommand]
-    private void ResetZoom() => Zoom = 1.0;
+    private void ResetZoom()
+    {
+        _isFitToWindow = false;
+        Zoom = 1.0;
+    }
+
+    [RelayCommand]
+    private void FitToWindow()
+    {
+        _isFitToWindow = true;
+        ApplyFit();
+    }
+
+    // The viewport is the scroll area available to the diagram; while fit mode is on the zoom follows it and the scene.
+    public void UpdateViewport(double width, double height)
+    {
+        _viewportWidth = width;
+        _viewportHeight = height;
+        ApplyFit();
+    }
+
+    private void ApplyFit()
+    {
+        if (!_isFitToWindow || Scene is null)
+        {
+            return;
+        }
+
+        double availableWidth = _viewportWidth - FitMargin;
+        double availableHeight = _viewportHeight - FitMargin;
+        if (availableWidth <= 0 || availableHeight <= 0 || Scene.Bounds.Width <= 0 || Scene.Bounds.Height <= 0)
+        {
+            return;
+        }
+
+        Zoom = Math.Clamp(Math.Min(availableWidth / Scene.Bounds.Width, availableHeight / Scene.Bounds.Height), MinimumZoom, MaximumZoom);
+    }
+
+    partial void OnSceneChanged(DiagramScene? value) => ApplyFit();
 
     [RelayCommand(CanExecute = nameof(HasScene))]
     private Task ExportPngAsync(CancellationToken cancellationToken) => ExportAsync(ExportFormat.Png, cancellationToken);

@@ -2,7 +2,9 @@ using System.Collections.ObjectModel;
 using IntegrationPlanner.Core.Editing;
 using IntegrationPlanner.Core.Editing.Commands;
 using IntegrationPlanner.Core.Model;
+using IntegrationPlanner.Jira;
 using IntegrationPlanner.UI.Editing;
+using IntegrationPlanner.UI.Localization;
 using IntegrationPlanner.UI.ViewModels.Properties;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -68,6 +70,30 @@ public sealed partial class MainViewModel
         BranchId branchId = BranchId.New();
         _editor!.Execute(PlanItemFactory.AddBranch(_editor.Current, CurrentScenario?.Id, branchId));
         SetSelection(new BranchSelection(branchId));
+    }
+
+    public bool AddBranchFromTicket(JiraIssue issue, string branchName, string mainlineBranchName)
+    {
+        ArgumentNullException.ThrowIfNull(issue);
+        if (_editor is null)
+        {
+            return false;
+        }
+
+        TicketBranchResult result = TicketBranchFactory.Create(_editor.Current, CurrentScenario, issue, branchName, mainlineBranchName);
+        switch (result.Error)
+        {
+            case TicketBranchError.DuplicateTicket:
+                _messages.ShowError(UiText.Format(UiText.JiraDuplicateTicketFormat, issue.Key));
+                return false;
+            case TicketBranchError.DuplicateName:
+                _messages.ShowError(UiText.Format(UiText.JiraDuplicateNameFormat, branchName.Trim()));
+                return false;
+        }
+
+        _editor.Execute(result.Command!);
+        SetSelection(new BranchSelection(result.BranchId));
+        return true;
     }
 
     [RelayCommand(CanExecute = nameof(HasLanes))]
@@ -301,7 +327,7 @@ public sealed partial class MainViewModel
         ScenarioId? scenarioId = CurrentScenario?.Id;
         return (selection, scenarioId) switch
         {
-            (BranchSelection branch, _) => new BranchPropertiesViewModel(_editor, scenarioId, branch.BranchId),
+            (BranchSelection branch, _) => new BranchPropertiesViewModel(_editor, scenarioId, branch.BranchId, TicketOpener),
             (ConnectorSelection connector, ScenarioId id) => new ConnectorPropertiesViewModel(_editor, id, connector.ConnectorId),
             (MarkerSelection marker, ScenarioId id) => new MarkerPropertiesViewModel(_editor, id, marker.MarkerId),
             _ => new PlanPropertiesViewModel(_editor, scenarioId),

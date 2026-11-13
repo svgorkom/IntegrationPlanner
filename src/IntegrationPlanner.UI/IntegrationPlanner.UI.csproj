@@ -14,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IntegrationPlanner.Core\IntegrationPlanner.Core.csproj" />
+    <ProjectReference Include="..\IntegrationPlanner.Jira\IntegrationPlanner.Jira.csproj" />
     <ProjectReference Include="..\IntegrationPlanner.Layout\IntegrationPlanner.Layout.csproj" />
     <ProjectReference Include="..\IntegrationPlanner.Persistence\IntegrationPlanner.Persistence.csproj" />
   </ItemGroup>

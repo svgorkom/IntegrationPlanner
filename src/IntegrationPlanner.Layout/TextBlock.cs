@@ -8,14 +8,17 @@ internal sealed record TextLine(string Text, TextStyle Style, double FontSize, S
 // A stack of text lines, each centred on the same vertical axis.
 internal sealed class TextBlock
 {
-    public TextBlock(ImmutableArray<TextLine> lines)
+    public TextBlock(ImmutableArray<TextLine> lines, string? toolTip = null)
     {
         Lines = lines;
+        ToolTip = toolTip;
         Width = lines.IsEmpty ? 0 : lines.Max(line => line.Size.Width);
         Height = lines.Sum(line => line.Size.Height);
     }
 
     public ImmutableArray<TextLine> Lines { get; }
+
+    public string? ToolTip { get; }
 
     public double Width { get; }
 
@@ -30,7 +33,7 @@ internal sealed class TextBlock
         foreach (TextLine line in Lines)
         {
             ScenePoint center = new(centerX, y + (line.Size.Height / 2));
-            texts.Add(new SceneText(key, line.Text, center, line.Size, 0, line.FontSize, line.Style, HasBackground: false));
+            texts.Add(new SceneText(key, line.Text, center, line.Size, 0, line.FontSize, line.Style, HasBackground: false, ToolTip));
             y += line.Size.Height;
         }
 

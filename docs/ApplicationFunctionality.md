@@ -42,6 +42,19 @@ IntegrationPlanner is a planning and visualization tool for branch integration d
 | Canvas | Click selects (lane, fork or branch label selects the branch; a connector label selects its connector); click on empty space selects the plan. Left-drag on a lane moves it between lane rows (`Order`); on a pull/merge or a branch-anchored marker it moves between steps (`Step`); the drag snaps and shows a preview, and the result is one undo step. Attached markers move along. Left-drag on empty space pans (D16). | `Rendering/SceneCanvas.cs`, `Rendering/SceneHitTester.cs`, `Editing/DragPlanner.cs` |
 | Delete | Deleting a selected branch removes it from the catalogue, so from every scenario, with its lanes, connectors and markers (cascade, undoable). To hide a branch in one scenario only, clear "Shown in this scenario" in the property panel. | `ViewModels/MainViewModel.Editing.cs` |
 
+## Jira Data Center (one-way import)
+
+| Area | Functionality | Where |
+|---|---|---|
+| Connection | Menu "Jira connection...": server address (context path allowed, http allowed), Personal Access Token (Bearer, REST API v2), mainline branch name (default `develop`). The token is stored in Windows Credential Manager, not in the settings file. The dialog has a 4-step help box and an "Open Jira profile" button. | `ViewModels/JiraSettingsViewModel.cs`, `src/IntegrationPlanner.Jira` |
+| Add from ticket | Menu "Add branch from Jira ticket...": pick a ticket; the branch name is generated from the ticket and can be overridden. One undo step adds the branch, its lane and a Pull from the mainline lane (the mainline branch is created if missing). A ticket or name that already exists is rejected. | `ViewModels/AddBranchFromTicketViewModel.cs`, `Editing/TicketBranchFactory.cs` |
+| Ticket label | A ticket branch shows only the ticket key on the canvas; hovering shows the full name and the ticket summary as a tooltip. | `Layout/SceneBuilder.cs`, `Rendering/SceneCanvas.cs` |
+| Property panel | A ticket branch shows its Jira key and an "Open in Jira" button (`<server>/browse/<KEY>`). | `Themes/PropertyPanel.xaml` |
+
+## Zoom: fit to window
+
+The "Fit" toolbar button (on by default) scales the diagram to fill the canvas area and follows window resizes and scene changes (25 % to 400 %). Zooming manually switches fit off.
+
 ## File loading outcomes
 
 | File | Outcome |
@@ -57,4 +70,4 @@ In the viewer, `Corrupt` and `UnsupportedSchemaVersion` are shown as messages, a
 
 | Phase | Functionality |
 |---|---|
-| Later | Jira/PR integration (D13). |
+| Later | Two-way Jira sync (status/summary snapshots), PR integration (D13). |

@@ -1,4 +1,5 @@
 using System.IO;
+using IntegrationPlanner.Jira;
 using IntegrationPlanner.Layout;
 using IntegrationPlanner.Layout.Scene;
 using IntegrationPlanner.Persistence;
@@ -390,6 +391,41 @@ public sealed class MainViewModelEditingTests
         viewModel.RenameElementCommand.Execute(new SceneRename(key, "release"));
 
         Assert.Equal("release", viewModel.RenameText(key));
+    }
+
+    [Fact]
+    public async Task AddBranchFromTicket_SelectsTheNewBranch()
+    {
+        MainViewModel viewModel = await CreateViewModelWithPlanAsync();
+        JiraIssue issue = new("AD-42", "Fix login", "Open", new Uri("https://jira.example.com/browse/AD-42"));
+
+        bool added = viewModel.AddBranchFromTicket(issue, "feature/AD-42", "develop");
+
+        Assert.Equal((true, true), (added, viewModel.SelectedProperties is BranchPropertiesViewModel));
+    }
+
+    [Fact]
+    public async Task AddBranchFromTicket_IsUndoneInOneStep()
+    {
+        MainViewModel viewModel = await CreateViewModelWithPlanAsync();
+        JiraIssue issue = new("AD-42", "Fix login", "Open", new Uri("https://jira.example.com/browse/AD-42"));
+        viewModel.AddBranchFromTicket(issue, "feature/AD-42", "develop");
+
+        viewModel.UndoCommand.Execute(null);
+
+        Assert.False(viewModel.HasUnsavedChanges);
+    }
+
+    [Fact]
+    public async Task AddBranchFromTicket_RejectsTheSameTicketTwice()
+    {
+        MainViewModel viewModel = await CreateViewModelWithPlanAsync();
+        JiraIssue issue = new("AD-42", "Fix login", "Open", new Uri("https://jira.example.com/browse/AD-42"));
+        viewModel.AddBranchFromTicket(issue, "feature/AD-42", "develop");
+
+        bool added = viewModel.AddBranchFromTicket(issue, "feature/AD-42-b", "develop");
+
+        Assert.Equal((false, UiText.Format(UiText.JiraDuplicateTicketFormat, "AD-42")), (added, Assert.Single(_messages.Errors)));
     }
 
     private MainViewModel CreateViewModel() =>

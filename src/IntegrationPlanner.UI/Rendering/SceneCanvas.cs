@@ -230,6 +230,11 @@ public sealed class SceneCanvas : FrameworkElement
             return;
         }
 
+        if (_dragKey is null)
+        {
+            UpdateToolTip(e.GetPosition(this));
+        }
+
         if (_dragKey is null || DragTargets is not { } targets || !targets.TryGetValue(_dragKey, out SceneDragTarget? target))
         {
             return;
@@ -244,6 +249,17 @@ public sealed class SceneCanvas : FrameworkElement
             _dragOffset = offset;
             RedrawOverlay();
         }
+    }
+
+    private void UpdateToolTip(Point position)
+    {
+        if (Scene is null)
+        {
+            return;
+        }
+
+        string? key = SceneHitTester.HitTest(Scene, ToScene(position), HitTolerance);
+        ToolTip = key is null ? null : Scene.Texts.FirstOrDefault(text => text.Key == key && text.ToolTip is not null)?.ToolTip;
     }
 
     protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)

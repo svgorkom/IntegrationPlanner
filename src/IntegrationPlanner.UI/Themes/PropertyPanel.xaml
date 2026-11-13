@@ -26,6 +26,11 @@
             <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding Name, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldName}" />
             <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldSummary}" />
             <TextBox Style="{StaticResource PropertyMultilineTextBoxStyle}" Text="{Binding Summary, Mode=TwoWay}" AutomationProperties.Name="{loc:Loc FieldSummary}" />
+            <StackPanel Visibility="{Binding HasJiraKey, Mode=OneTime, Converter={StaticResource TrueToVisibleConverter}}">
+                <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc FieldJiraTicket}" />
+                <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding JiraKey, Mode=OneWay}" IsReadOnly="True" AutomationProperties.Name="{loc:Loc FieldJiraTicket}" />
+                <Button Command="{Binding OpenInJiraCommand, Mode=OneTime}" Content="{loc:Loc JiraOpenTicket}" HorizontalAlignment="Left" Margin="0,4,0,0" Padding="10,4" />
+            </StackPanel>
             <CheckBox Style="{StaticResource PropertyCheckBoxStyle}" IsChecked="{Binding IsMainline, Mode=TwoWay}" Content="{loc:Loc FieldIsMainline}" />
             <CheckBox Style="{StaticResource PropertyCheckBoxStyle}" IsChecked="{Binding IsCancelled, Mode=TwoWay}" Content="{loc:Loc FieldIsCancelled}" />
             <StackPanel Visibility="{Binding HasScenario, Mode=OneTime, Converter={StaticResource TrueToVisibleConverter}}">

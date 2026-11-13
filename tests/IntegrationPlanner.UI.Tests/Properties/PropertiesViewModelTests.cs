@@ -43,6 +43,30 @@ public sealed class PropertiesViewModelTests
     }
 
     [Fact]
+    public async Task OpenInJira_PassesTheTicketKeyToTheOpener()
+    {
+        _editor.Execute(new UpdateBranchCommand(_editor.Current.Branches.Find(branch => branch.Id == TestPlans.Feature)! with { JiraKey = "AD-7" }));
+        string? opened = null;
+        BranchPropertiesViewModel properties = new(_editor, TestPlans.First, TestPlans.Feature, key =>
+        {
+            opened = key;
+            return Task.CompletedTask;
+        });
+
+        await properties.OpenInJiraCommand.ExecuteAsync(null);
+
+        Assert.Equal(("AD-7", true), (opened, properties.HasJiraKey));
+    }
+
+    [Fact]
+    public void OpenInJira_IsDisabledForABranchWithoutATicket()
+    {
+        BranchPropertiesViewModel properties = new(_editor, TestPlans.First, TestPlans.Feature, _ => Task.CompletedTask);
+
+        Assert.False(properties.OpenInJiraCommand.CanExecute(null));
+    }
+
+    [Fact]
     public void BranchName_IsOneUndoStep()
     {
         Plan original = _editor.Current;

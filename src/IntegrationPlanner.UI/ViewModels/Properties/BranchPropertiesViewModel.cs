@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using IntegrationPlanner.Core.Editing;
 using IntegrationPlanner.Core.Editing.Commands;
 using IntegrationPlanner.Core.Model;
@@ -45,12 +46,25 @@ public sealed partial class BranchPropertiesViewModel : PropertiesViewModel
     [ObservableProperty]
     private int? _forkStep;
 
-    public BranchPropertiesViewModel(PlanEditor editor, ScenarioId? scenarioId, BranchId branchId)
+    [ObservableProperty]
+    private string _jiraKey = string.Empty;
+
+    private readonly Func<string, Task>? _openTicket;
+
+    public BranchPropertiesViewModel(PlanEditor editor, ScenarioId? scenarioId, BranchId branchId, Func<string, Task>? openTicket = null)
         : base(editor, scenarioId)
     {
+        _openTicket = openTicket;
         BranchId = branchId;
         Refresh();
     }
+
+    public bool HasJiraKey => !string.IsNullOrEmpty(JiraKey);
+
+    [RelayCommand(CanExecute = nameof(CanOpenInJira))]
+    private Task OpenInJiraAsync() => _openTicket!(JiraKey);
+
+    private bool CanOpenInJira() => _openTicket is not null && HasJiraKey;
 
     public BranchId BranchId { get; }
 
@@ -73,6 +87,7 @@ public sealed partial class BranchPropertiesViewModel : PropertiesViewModel
         Summary = branch.Summary;
         IsMainline = branch.IsMainline;
         IsCancelled = branch.IsCancelled;
+        JiraKey = branch.JiraKey ?? string.Empty;
         Lane? lane = CurrentLane();
         IsInScenario = lane is not null;
         Order = lane?.Order ?? 0;

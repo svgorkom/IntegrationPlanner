@@ -1,0 +1,41 @@
+<Window x:Class="IntegrationPlanner.UI.JiraSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:IntegrationPlanner.UI.Localization"
+        Title="{loc:Loc JiraSettingsTitle}"
+        Width="520"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
+        FontFamily="{StaticResource UiFontFamily}">
+    <StackPanel Margin="20">
+        <Border Padding="12" Margin="0,0,0,14" CornerRadius="6" Background="{DynamicResource GlassPanelBrush}">
+            <StackPanel>
+                <TextBlock FontWeight="SemiBold" Margin="0,0,0,6" Text="{loc:Loc JiraHelpTitle}" />
+                <TextBlock TextWrapping="Wrap" Text="{loc:Loc JiraHelpStep1}" />
+                <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Text="{loc:Loc JiraHelpStep2}" />
+                <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Text="{loc:Loc JiraHelpStep3}" />
+                <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Text="{loc:Loc JiraHelpStep4}" />
+                <Button HorizontalAlignment="Left" Padding="12,4" Margin="0,8,0,0" Click="OnOpenProfile" Content="{loc:Loc JiraOpenProfile}" />
+            </StackPanel>
+        </Border>
+        <TextBlock Style="{StaticResource PropertyLabelStyle}" Text="{loc:Loc JiraBaseUrlLabel}" />
+        <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding BaseUrl, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Style="{StaticResource PropertyLabelStyle}" Margin="0,10,0,0" Text="{loc:Loc JiraApiTokenLabel}" />
+        <PasswordBox x:Name="TokenBox" PasswordChanged="OnTokenChanged" />
+        <TextBlock Style="{StaticResource HintTextStyle}" TextWrapping="Wrap" Text="{loc:Loc JiraApiTokenHint}" />
+        <TextBlock Style="{StaticResource PropertyLabelStyle}" Margin="0,10,0,0" Text="{loc:Loc JiraProjectKeyLabel}" />
+        <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding ProjectKey, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Style="{StaticResource PropertyLabelStyle}" Margin="0,10,0,0" Text="{loc:Loc JiraMainlineLabel}" />
+        <TextBox Style="{StaticResource PropertyTextBoxStyle}" Text="{Binding MainlineBranchName, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Margin="0,12,0,0" TextWrapping="Wrap" MinHeight="32" Text="{Binding StatusMessage, Mode=OneWay}" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Padding="12,4" Margin="0,0,8,0" Content="{loc:Loc JiraTestConnection}" Command="{Binding TestConnectionCommand, Mode=OneTime}" />
+            <Button Padding="12,4" Margin="0,0,8,0" IsDefault="True" Content="{loc:Loc JiraSave}" Command="{Binding SaveCommand, Mode=OneTime}" />
+            <Button Padding="12,4" IsCancel="True" Content="{loc:Loc JiraCancel}" Command="{Binding CancelCommand, Mode=OneTime}" />
+        </StackPanel>
+    </StackPanel>
+</Window>

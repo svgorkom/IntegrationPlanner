@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using IntegrationPlanner.Jira;
 using IntegrationPlanner.Layout;
 using IntegrationPlanner.Persistence;
 using IntegrationPlanner.UI.Diagnostics;
@@ -70,6 +71,15 @@ public partial class App : Application
         services.AddSingleton<ISceneExporter, SceneExporter>();
         services.AddSingleton<UnhandledExceptionHandler>();
         services.AddSingleton<ThemeService>();
+        services.AddSingleton<IJiraSettingsStore>(_ => new JiraSettingsStore(JiraSettingsStore.DefaultPath));
+        services.AddSingleton<IJiraTokenStore, CredentialManagerTokenStore>();
+        services.AddSingleton<IJiraClientFactory, JiraClientFactory>();
+        services.AddTransient<JiraSettingsViewModel>();
+        services.AddTransient<JiraSettingsWindow>();
+        services.AddTransient<AddBranchFromTicketViewModel>();
+        services.AddTransient<AddBranchFromTicketWindow>();
+        services.AddSingleton<Func<JiraSettingsWindow>>(provider => provider.GetRequiredService<JiraSettingsWindow>);
+        services.AddSingleton<Func<AddBranchFromTicketWindow>>(provider => provider.GetRequiredService<AddBranchFromTicketWindow>);
         services.AddSingleton<MainViewModel>();
         services.AddTransient<MainWindow>();
         return services;

@@ -15,7 +15,7 @@ internal static class SamplePlan
             Branches =
             [
                 new Branch(Develop, "Develop", string.Empty, IsMainline: true, IsCancelled: false),
-                new Branch(FeatureA, "AD-1", "Feature \"A\" with ^2 and <tags>", IsMainline: false, IsCancelled: false),
+                new Branch(FeatureA, "AD-1", "Feature \"A\" with ^2 and <tags>", IsMainline: false, IsCancelled: false, JiraKey: "AD-1"),
                 new Branch(SubOfA, "AD-3", "Sub of A", IsMainline: false, IsCancelled: true),
             ],
             Scenarios =

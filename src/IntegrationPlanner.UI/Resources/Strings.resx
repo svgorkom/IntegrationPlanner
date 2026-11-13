@@ -42,6 +42,12 @@
   <data name="ToolbarResetZoomToolTip" xml:space="preserve">
     <value>Reset zoom to 100% (Ctrl+0)</value>
   </data>
+  <data name="ToolbarFit" xml:space="preserve">
+    <value>Fit</value>
+  </data>
+  <data name="ToolbarFitToolTip" xml:space="preserve">
+    <value>Fit the diagram to the window</value>
+  </data>
   <data name="ToolbarExportPng" xml:space="preserve">
     <value>Export PNG...</value>
   </data>
@@ -303,6 +309,12 @@
   <data name="FieldIsMainline" xml:space="preserve">
     <value>Mainline</value>
   </data>
+  <data name="FieldJiraTicket" xml:space="preserve">
+    <value>Jira ticket</value>
+  </data>
+  <data name="JiraOpenTicket" xml:space="preserve">
+    <value>Open in Jira</value>
+  </data>
   <data name="FieldIsCancelled" xml:space="preserve">
     <value>Cancelled</value>
   </data>
@@ -365,5 +377,113 @@
   </data>
   <data name="ToolbarToggleTheme" xml:space="preserve">
     <value>Switch light/dark theme</value>
+  </data>
+  <data name="ToolbarJiraSettings" xml:space="preserve">
+    <value>Jira connection...</value>
+  </data>
+  <data name="JiraSettingsTitle" xml:space="preserve">
+    <value>Jira connection</value>
+  </data>
+  <data name="JiraHelpTitle" xml:space="preserve">
+    <value>How to connect in 4 steps</value>
+  </data>
+  <data name="JiraHelpStep1" xml:space="preserve">
+    <value>1. Type the address of your Jira server below, e.g. https://jira.yourcompany.com</value>
+  </data>
+  <data name="JiraHelpStep2" xml:space="preserve">
+    <value>2. Click "Open Jira profile". In Jira, choose Personal Access Tokens, then Create token. Give it a name and copy the token.</value>
+  </data>
+  <data name="JiraHelpStep3" xml:space="preserve">
+    <value>3. Paste the token in the Personal access token box.</value>
+  </data>
+  <data name="JiraHelpStep4" xml:space="preserve">
+    <value>4. Click Test connection. When it says Connected, click Save.</value>
+  </data>
+  <data name="AddFromJiraTitle" xml:space="preserve">
+    <value>Add branch from Jira ticket</value>
+  </data>
+  <data name="JiraSearchLabel" xml:space="preserve">
+    <value>Ticket key or text (e.g. AD-123 or "login")</value>
+  </data>
+  <data name="JiraSearchButton" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="JiraBranchNameLabel" xml:space="preserve">
+    <value>Branch name (you can change it)</value>
+  </data>
+  <data name="JiraResetName" xml:space="preserve">
+    <value>Use generated name</value>
+  </data>
+  <data name="JiraAddBranch" xml:space="preserve">
+    <value>Add branch</value>
+  </data>
+  <data name="JiraNoResults" xml:space="preserve">
+    <value>No tickets found.</value>
+  </data>
+  <data name="JiraDuplicateTicketFormat" xml:space="preserve">
+    <value>The plan already has a branch for ticket {0}.</value>
+  </data>
+  <data name="JiraDuplicateNameFormat" xml:space="preserve">
+    <value>The plan already has a branch named "{0}". Choose another name.</value>
+  </data>
+  <data name="ToolbarAddFromJira" xml:space="preserve">
+    <value>Add branch from Jira ticket...</value>
+  </data>
+  <data name="JiraOpenProfile" xml:space="preserve">
+    <value>Open Jira profile</value>
+  </data>
+  <data name="JiraOpenPageFailed" xml:space="preserve">
+    <value>The browser could not be opened. Open your Jira profile manually and choose Personal Access Tokens.</value>
+  </data>
+  <data name="JiraBaseUrlLabel" xml:space="preserve">
+    <value>Jira server address (e.g. https://jira.yourcompany.com)</value>
+  </data>
+  <data name="JiraApiTokenLabel" xml:space="preserve">
+    <value>Personal access token</value>
+  </data>
+  <data name="JiraApiTokenHint" xml:space="preserve">
+    <value>Leave empty to keep the stored token. The token is kept in the Windows Credential Manager.</value>
+  </data>
+  <data name="JiraProjectKeyLabel" xml:space="preserve">
+    <value>Project key (optional filter)</value>
+  </data>
+  <data name="JiraMainlineLabel" xml:space="preserve">
+    <value>Branch new ticket branches start from</value>
+  </data>
+  <data name="JiraTestConnection" xml:space="preserve">
+    <value>Test connection</value>
+  </data>
+  <data name="JiraSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="JiraCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="JiraConnectedFormat" xml:space="preserve">
+    <value>Connected as {0}.</value>
+  </data>
+  <data name="JiraSettingsIncomplete" xml:space="preserve">
+    <value>Enter the Jira server address and a personal access token.</value>
+  </data>
+  <data name="JiraMainlineRequired" xml:space="preserve">
+    <value>Enter the name of the branch new ticket branches start from.</value>
+  </data>
+  <data name="JiraFailureUnreachable" xml:space="preserve">
+    <value>Jira could not be reached. Check the server address and your network.</value>
+  </data>
+  <data name="JiraFailureUnauthorized" xml:space="preserve">
+    <value>Jira rejected the personal access token.</value>
+  </data>
+  <data name="JiraFailureNotFound" xml:space="preserve">
+    <value>Jira answered that the address was not found. Check the site address.</value>
+  </data>
+  <data name="JiraFailureOther" xml:space="preserve">
+    <value>Jira returned an unexpected answer.</value>
+  </data>
+  <data name="ErrorJiraSettingsLoad" xml:space="preserve">
+    <value>The Jira settings could not be read; defaults are shown.</value>
+  </data>
+  <data name="ErrorJiraSettingsSave" xml:space="preserve">
+    <value>The Jira settings could not be saved.</value>
   </data>
 </root>

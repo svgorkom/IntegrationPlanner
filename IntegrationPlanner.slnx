@@ -1,12 +1,14 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/IntegrationPlanner.Core/IntegrationPlanner.Core.csproj" />
+    <Project Path="src/IntegrationPlanner.Jira/IntegrationPlanner.Jira.csproj" />
     <Project Path="src/IntegrationPlanner.Layout/IntegrationPlanner.Layout.csproj" />
     <Project Path="src/IntegrationPlanner.Persistence/IntegrationPlanner.Persistence.csproj" />
     <Project Path="src/IntegrationPlanner.UI/IntegrationPlanner.UI.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/IntegrationPlanner.Core.Tests/IntegrationPlanner.Core.Tests.csproj" />
+    <Project Path="tests/IntegrationPlanner.Jira.Tests/IntegrationPlanner.Jira.Tests.csproj" />
     <Project Path="tests/IntegrationPlanner.Layout.Tests/IntegrationPlanner.Layout.Tests.csproj" />
     <Project Path="tests/IntegrationPlanner.Persistence.Tests/IntegrationPlanner.Persistence.Tests.csproj" />
     <Project Path="tests/IntegrationPlanner.UI.Tests/IntegrationPlanner.UI.Tests.csproj" />

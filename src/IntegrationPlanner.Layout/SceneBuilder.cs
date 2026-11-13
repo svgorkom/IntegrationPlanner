@@ -155,6 +155,13 @@ internal sealed class SceneBuilder
         Branch branch = lane.Branch;
         TextStyle nameStyle = branch.IsCancelled ? TextStyle.CancelledBranchName : TextStyle.BranchName;
         TextStyle summaryStyle = branch.IsCancelled ? TextStyle.CancelledBranchSummary : TextStyle.BranchSummary;
+        if (!string.IsNullOrWhiteSpace(branch.JiraKey))
+        {
+            // A ticket branch shows only its key; the full name and summary are in the tooltip.
+            string toolTip = string.IsNullOrWhiteSpace(branch.Summary) ? branch.Name : $"{branch.Name}{Environment.NewLine}{branch.Summary}";
+            return new TextBlock([_text.Line(branch.JiraKey, nameStyle, _options.BranchNameFontSize)], toolTip);
+        }
+
         double wrapWidth = Math.Clamp(lane.EndX - lane.StartX - (2 * _options.LabelGap), _options.MinimumSummaryWrapWidth, _options.SummaryWrapWidth);
         ImmutableArray<TextLine> summary = _text.Wrapped(branch.Summary, summaryStyle, _options.BranchSummaryFontSize, wrapWidth);
         return new TextBlock([_text.Line(branch.Name, nameStyle, _options.BranchNameFontSize), .. summary]);

@@ -7,7 +7,7 @@ Source of truth: `docs/Design.md` section 2 (v0.2). The model is **data only**: 
 | Entity | Fields | Notes |
 |---|---|---|
 | `Plan` | `Title`, `Branches`, `Scenarios` | One file. `schemaVersion` exists only in the file format, not on the model. |
-| `Branch` | `Id`, `Name`, `Summary`, `IsMainline`, `IsCancelled` | Shared catalogue across all scenarios. `IsMainline` and `IsCancelled` only affect styling. |
+| `Branch` | `Id`, `Name`, `Summary`, `IsMainline`, `IsCancelled`, `JiraKey?` | Shared catalogue across all scenarios. `IsMainline` and `IsCancelled` only affect styling. `JiraKey` is the Jira ticket the branch was created from (null otherwise). |
 | `Scenario` | `Id`, `Name`, `StepCount`, `Lanes`, `Connectors`, `Markers` | One diagram. The horizontal axis is ordered steps; there are no dates (D7). |
 | `Lane` | `BranchId`, `Order`, `StartStep`, `EndStep?`, `ShowFork`, `ForkFromBranchId?`, `ForkStep?` | Places a branch in a scenario. `Order` < 0 is above the mainline, > 0 below. No `EndStep` means "to the last step". The fork line is optional (D5). |
 | `Connector` | `Id`, `Kind` (Pull, Merge), `FromBranchId`, `ToBranchId`, `Step`, `Label?`, `State` | May connect any two branches (D3). |

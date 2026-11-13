@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "title": "Untitled plan",
+  "branches": [
+    {
+      "id": "f08f09b8388a4aea901cf1c9aded6bd6",
+      "name": "Develop",
+      "summary": "",
+      "isMainline": false,
+      "isCancelled": false
+    },
+    {
+      "id": "59ead55562684b648d89a7bb10e6e199",
+      "name": "AD-X",
+      "summary": "",
+      "isMainline": false,
+      "isCancelled": false
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "36ddd743eedb48a38953a8377f6abf56",
+      "name": "Scenario 1",
+      "stepCount": 10,
+      "lanes": [
+        {
+          "branchId": "f08f09b8388a4aea901cf1c9aded6bd6",
+          "order": 0,
+          "startStep": 0,
+          "showFork": false
+        },
+        {
+          "branchId": "59ead55562684b648d89a7bb10e6e199",
+          "order": 1,
+          "startStep": 0,
+          "showFork": false
+        }
+      ],
+      "connectors": [
+        {
+          "id": "c6ccd058a7c64730a720542be0c4e3e5",
+          "kind": "merge",
+          "fromBranchId": "f08f09b8388a4aea901cf1c9aded6bd6",
+          "toBranchId": "59ead55562684b648d89a7bb10e6e199",
+          "step": 1,
+          "state": "planned"
+        },
+        {
+          "id": "35e5c0391c614d0cb4affbf15b32786f",
+          "kind": "merge",
+          "fromBranchId": "59ead55562684b648d89a7bb10e6e199",
+          "toBranchId": "f08f09b8388a4aea901cf1c9aded6bd6",
+          "step": 3,
+          "state": "planned"
+        }
+      ],
+      "markers": [
+        {
+          "id": "19797e0e92184231bcd7618ebb17e2d8",
+          "kind": "custom",
+          "label": "Execute throughput tests",
+          "anchor": {
+            "branchId": "f08f09b8388a4aea901cf1c9aded6bd6",
+            "step": 3
+          },
+          "direction": "fromTop",
+          "state": "planned"
+        }
+      ]
+    }
+  ]
+}

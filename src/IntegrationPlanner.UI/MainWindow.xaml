@@ -47,17 +47,15 @@
                             <MenuItem Header="{loc:Loc ToolbarExportSvg}" Command="{Binding ExportSvgCommand, Mode=OneTime}" />
                             <MenuItem Header="{loc:Loc ToolbarCopy}" Command="{Binding CopyToClipboardCommand, Mode=OneTime}" />
                             <Separator />
+                            <MenuItem Header="{loc:Loc ToolbarAddFromJira}" Click="OnAddFromJira" IsEnabled="{Binding HasPlan, Mode=OneWay}" />
+                            <MenuItem Header="{loc:Loc ToolbarJiraSettings}" Click="OnJiraSettings" />
                             <MenuItem Header="{loc:Loc ToolbarToggleTheme}" Click="OnToggleTheme" />
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>
             </StackPanel>
             <TextBlock Grid.Column="1" Style="{StaticResource TitleTextStyle}" Text="{Binding WindowTitle, Mode=OneWay}" />
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
-                <Button Style="{StaticResource CaptionButtonStyle}" Content="&#xE921;" Click="OnMinimizeClick" />
-                <Button x:Name="MaximizeButton" Style="{StaticResource CaptionButtonStyle}" Content="&#xE922;" Click="OnMaximizeClick" />
-                <Button Style="{StaticResource CaptionCloseButtonStyle}" Content="&#xE8BB;" Click="OnCloseClick" />
-            </StackPanel>
+            <Border Grid.Column="2" Width="140" />
         </Grid>
 
         <Border DockPanel.Dock="Left" Style="{StaticResource ExplorerPanelStyle}" IsEnabled="{Binding HasPlan, Mode=OneWay}">
@@ -128,7 +126,7 @@
                     <MenuItem Header="{loc:Loc ToolbarDelete}" Command="{Binding DeleteSelectionCommand, Mode=OneTime}" />
                 </ContextMenu>
             </Grid.ContextMenu>
-            <ScrollViewer Style="{StaticResource DiagramScrollViewerStyle}"
+            <ScrollViewer x:Name="DiagramScroll" SizeChanged="OnDiagramScrollSizeChanged" Style="{StaticResource DiagramScrollViewerStyle}"
                           behaviors:ScrollViewerBehaviors.ZoomInCommand="{Binding ZoomInCommand, Mode=OneTime}"
                           behaviors:ScrollViewerBehaviors.ZoomOutCommand="{Binding ZoomOutCommand, Mode=OneTime}"
                           behaviors:ScrollViewerBehaviors.IsDragPanEnabled="True">
@@ -155,6 +153,7 @@
                     <Button Style="{StaticResource ZoomButtonStyle}" Content="{loc:Loc ToolbarZoomOut}" Command="{Binding ZoomOutCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarZoomOutToolTip}" />
                     <Button Style="{StaticResource ZoomValueButtonStyle}" Content="{Binding Zoom, Mode=OneWay}" ContentStringFormat="P0" Command="{Binding ResetZoomCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarResetZoomToolTip}" />
                     <Button Style="{StaticResource ZoomButtonStyle}" Content="{loc:Loc ToolbarZoomIn}" Command="{Binding ZoomInCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarZoomInToolTip}" />
+                    <Button Style="{StaticResource ZoomValueButtonStyle}" Content="{loc:Loc ToolbarFit}" Command="{Binding FitToWindowCommand, Mode=OneTime}" ToolTip="{loc:Loc ToolbarFitToolTip}" />
                 </StackPanel>
             </Border>
             <TextBox x:Name="InlineEditor" Style="{StaticResource InlineEditorTextBoxStyle}" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"

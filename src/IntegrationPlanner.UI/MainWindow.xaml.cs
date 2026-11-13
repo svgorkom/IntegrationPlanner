@@ -1,10 +1,13 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using IntegrationPlanner.Jira;
 using IntegrationPlanner.UI.Editing;
+using IntegrationPlanner.UI.Localization;
 using IntegrationPlanner.UI.Services;
 using IntegrationPlanner.UI.ViewModels;
 
@@ -14,14 +17,33 @@ public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
     private readonly ThemeService _themeService;
+    private readonly Func<JiraSettingsWindow> _jiraSettingsWindowFactory;
+    private readonly Func<AddBranchFromTicketWindow> _addFromTicketWindowFactory;
+    private readonly IJiraSettingsStore _jiraSettingsStore;
+    private readonly IMessageService _messages;
     private bool _isCloseConfirmed;
     private string? _renameKey;
 
-    public MainWindow(MainViewModel viewModel, ThemeService themeService)
+    public MainWindow(
+        MainViewModel viewModel,
+        ThemeService themeService,
+        Func<JiraSettingsWindow> jiraSettingsWindowFactory,
+        Func<AddBranchFromTicketWindow> addFromTicketWindowFactory,
+        IJiraSettingsStore jiraSettingsStore,
+        IMessageService messages)
     {
         ArgumentNullException.ThrowIfNull(viewModel);
         ArgumentNullException.ThrowIfNull(themeService);
+        ArgumentNullException.ThrowIfNull(jiraSettingsWindowFactory);
+        ArgumentNullException.ThrowIfNull(addFromTicketWindowFactory);
+        ArgumentNullException.ThrowIfNull(jiraSettingsStore);
+        ArgumentNullException.ThrowIfNull(messages);
         InitializeComponent();
+        _addFromTicketWindowFactory = addFromTicketWindowFactory;
+        _jiraSettingsStore = jiraSettingsStore;
+        _messages = messages;
+        viewModel.TicketOpener = OpenTicketAsync;
+        _jiraSettingsWindowFactory = jiraSettingsWindowFactory;
         _viewModel = viewModel;
         _themeService = themeService;
         DataContext = viewModel;
@@ -29,7 +51,6 @@ public partial class MainWindow : Window
         PreviewKeyDown += OnPreviewKeyDown;
         Closing += OnClosing;
         SourceInitialized += (_, _) => ApplyBackdrop();
-        StateChanged += (_, _) => MaximizeButton.Content = WindowState == WindowState.Maximized ? "\uE923" : "\uE922";
         _themeService.Changed += (_, _) => ApplyBackdrop();
     }
 
@@ -51,23 +72,47 @@ public partial class MainWindow : Window
         MoreButton.ContextMenu.IsOpen = true;
     }
 
+    private void OnDiagramScrollSizeChanged(object sender, SizeChangedEventArgs e) =>
+        _viewModel.UpdateViewport(DiagramScroll.ActualWidth, DiagramScroll.ActualHeight);
+
     private void OnToggleTheme(object sender, RoutedEventArgs e) => _themeService.Toggle();
 
-    private void OnMinimizeClick(object sender, RoutedEventArgs e) => SystemCommands.MinimizeWindow(this);
-
-    private void OnMaximizeClick(object sender, RoutedEventArgs e)
+    private void OnJiraSettings(object sender, RoutedEventArgs e)
     {
-        if (WindowState == WindowState.Maximized)
+        JiraSettingsWindow dialog = _jiraSettingsWindowFactory();
+        dialog.Owner = this;
+        dialog.ShowDialog();
+    }
+
+    private async Task OpenTicketAsync(string key)
+    {
+        JiraSettings settings = await _jiraSettingsStore.LoadAsync(CancellationToken.None);
+        if (!Uri.TryCreate(settings.BaseUrl.Trim().TrimEnd('/') + "/browse/" + Uri.EscapeDataString(key), UriKind.Absolute, out Uri? uri)
+            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {
-            SystemCommands.RestoreWindow(this);
+            _messages.ShowError(UiText.JiraSettingsIncomplete);
+            return;
         }
-        else
+
+        try
         {
-            SystemCommands.MaximizeWindow(this);
+            Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
+        }
+        catch (Win32Exception)
+        {
+            _messages.ShowError(UiText.JiraOpenPageFailed);
         }
     }
 
-    private void OnCloseClick(object sender, RoutedEventArgs e) => SystemCommands.CloseWindow(this);
+    private void OnAddFromJira(object sender, RoutedEventArgs e)
+    {
+        AddBranchFromTicketWindow dialog = _addFromTicketWindowFactory();
+        dialog.Owner = this;
+        if (dialog.ShowDialog() == true && dialog.ViewModel.SelectedIssue is { } issue)
+        {
+            _viewModel.AddBranchFromTicket(issue, dialog.ViewModel.BranchName, dialog.ViewModel.MainlineBranchName);
+        }
+    }
 
     private void OnRenameSelected(object sender, RoutedEventArgs e)
     {

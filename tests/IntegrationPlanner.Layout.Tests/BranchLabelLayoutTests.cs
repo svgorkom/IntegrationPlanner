@@ -37,6 +37,21 @@ public sealed class BranchLabelLayoutTests
     }
 
     [Fact]
+    public void TicketBranch_ShowsOnlyItsKeyWithTheFullNameAsToolTip()
+    {
+        Plan plan = TestPlan.Create([TestPlan.LaneOf(TestPlan.Feature, 1, 2, 6)]);
+        plan = plan with
+        {
+            Branches = plan.Branches.ConvertAll(branch => branch.Id == TestPlan.Feature ? branch with { Name = "feature/AD-1-long-name", JiraKey = "AD-1" } : branch),
+        };
+
+        DiagramScene scene = TestPlan.Layout(plan);
+
+        SceneText label = Assert.Single(scene.Texts(SceneKeys.BranchLabel(TestPlan.Feature)));
+        Assert.Equal(("AD-1", true), (label.Text, label.ToolTip!.StartsWith("feature/AD-1-long-name", StringComparison.Ordinal)));
+    }
+
+    [Fact]
     public void BranchWithoutSummary_IsLabelledWithItsNameOnly()
     {
         Plan plan = TestPlan.Create([TestPlan.Mainline()]);

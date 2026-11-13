@@ -28,6 +28,7 @@ internal static class PlanDocumentMapper
             Summary = branch.Summary,
             IsMainline = branch.IsMainline,
             IsCancelled = branch.IsCancelled,
+            JiraKey = branch.JiraKey,
         };
 
     private static ScenarioDocument ToDocument(Scenario scenario) =>
@@ -87,7 +88,8 @@ internal static class PlanDocumentMapper
             Require(document.Name, "branch.name"),
             document.Summary ?? string.Empty,
             document.IsMainline,
-            document.IsCancelled);
+            document.IsCancelled,
+            string.IsNullOrWhiteSpace(document.JiraKey) ? null : document.JiraKey);
 
     private static Scenario ToScenario(ScenarioDocument document) =>
         new(

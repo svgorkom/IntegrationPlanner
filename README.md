@@ -49,6 +49,8 @@ The optional argument is a plan file to open at start-up. Logs go to `%LocalAppD
 | Change items | Select on the canvas or in the explorer, edit in the property panel on the right (commits on leaving the field or Enter). |
 | Drag | Drag a lane up/down to reorder; drag a pull, merge or branch-anchored marker left/right to change its step. Drag empty space to pan. |
 | Delete, undo, redo | Del, Ctrl+Z, Ctrl+Y (or the toolbar). |
+| Jira | Menu "Jira connection..." (Jira Data Center, Personal Access Token; the dialog explains each field), then "Add branch from Jira ticket..." to create a branch from a ticket. Import only. |
+| Fit | The "Fit" toolbar button scales the diagram to the window. |
 
 Details: `docs/ApplicationFunctionality.md`.
 
@@ -59,6 +61,7 @@ Details: `docs/ApplicationFunctionality.md`.
 | `src/IntegrationPlanner.Core` | Model and undoable editing commands |
 | `src/IntegrationPlanner.Layout` | Pure diagram layout: scenario -> `DiagramScene` |
 | `src/IntegrationPlanner.Persistence` | `*.iplan.json` load/save |
+| `src/IntegrationPlanner.Jira` | Jira Data Center client, settings and branch naming |
 | `src/IntegrationPlanner.UI` | WPF editor (rendering, editing, zoom/pan, export), logging and composition root |
 | `tests/` | xUnit test projects |
 | `samples/scenario3.iplan.json` | Scenario 3 of the reference diagram |
